@@ -32,16 +32,16 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, onS
         fetchModels();
     }, [selectedModel, onSelectModel]);
 
-    if (loading) return <div className="text-gray-400 text-sm">Loading models...</div>;
+    if (loading) return <div className="app-model-hint text-sm">Loading models...</div>;
     if (error) return <div className="text-red-400 text-sm">{error}</div>;
 
     return (
         <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-300">Select Model:</label>
+            <label className="app-model-label text-sm font-medium">Select Model:</label>
             <select
                 value={selectedModel}
                 onChange={(e) => onSelectModel(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="app-model-select w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
                 <option value="" disabled>Choose a model</option>
                 {models.map((model) => (

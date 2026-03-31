@@ -3,6 +3,7 @@ import type { Message } from '../types';
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
 import { ModelSelector } from './ModelSelector';
+import { Header } from './Header';
 
 export const ChatContainer: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -85,9 +86,9 @@ export const ChatContainer: React.FC = () => {
     };
 
     return (
-        <div className="flex h-screen w-full bg-gray-50 text-gray-900">
-            <div className="hidden md:flex flex-col w-64 bg-gray-900 text-white p-4 shrink-0">
-                <h2 className="text-xl font-bold mb-6">Local LLM</h2>
+        <div className="app-shell flex h-screen w-full bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
+            <div className="app-sidebar hidden md:flex flex-col w-64 p-4 shrink-0">
+                <h2 className="app-sidebar-title text-xl font-bold mb-6">Local LLM</h2>
                 <div className="flex-1 overflow-y-auto">
                     <ModelSelector
                         selectedModel={selectedModel}
@@ -96,12 +97,14 @@ export const ChatContainer: React.FC = () => {
                 </div>
             </div>
 
-            <div className="flex-1 flex flex-col h-full bg-white relative min-w-0">
-                <div className="flex-1 overflow-y-auto p-4">
+            <div className="app-main flex-1 flex flex-col h-full bg-white relative min-w-0 dark:bg-gray-900">
+                <Header />
+
+                <div className="app-messages flex-1 overflow-y-auto p-4">
                     <MessageList messages={messages} />
                 </div>
 
-                <div className="p-4 bg-white border-t border-gray-200 shrink-0">
+                <div className="app-input-wrap p-4 bg-white border-t border-gray-200 shrink-0 dark:bg-gray-900 dark:border-gray-700">
                     <MessageInput
                         onSendMessage={handleSendMessage}
                         disabled={isGenerating || !selectedModel}

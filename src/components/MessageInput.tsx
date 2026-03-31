@@ -24,7 +24,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disab
                 onChange={(e) => setInput(e.target.value)}
                 disabled={disabled}
                 placeholder="Type a message..."
-                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                className="message-input flex-1 border border-gray-300 rounded-lg px-4 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700 dark:placeholder:text-gray-400 dark:disabled:bg-gray-800"
             />
             <button
                 type="submit"

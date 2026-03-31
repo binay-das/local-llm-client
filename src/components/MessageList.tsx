@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { Message } from '../types';
 
 interface MessageListProps {
@@ -6,6 +6,12 @@ interface MessageListProps {
 }
 
 export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
+    const bottomRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+
     if (messages.length === 0) {
         return (
             <div className="flex-1 flex items-center justify-center text-gray-400 h-full">
@@ -32,6 +38,7 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
                     </div>
                 </div>
             ))}
+            <div ref={bottomRef} />
         </div>
     );
 };

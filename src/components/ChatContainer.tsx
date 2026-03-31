@@ -2,12 +2,18 @@ import React, { useState } from 'react';
 import type { Message } from '../types';
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
+import { ModelSelector } from './ModelSelector';
 
 export const ChatContainer: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [selectedModel, setSelectedModel] = useState<string>('');
 
     const handleSendMessage = async (content: string) => {
+        if (!selectedModel) {
+            alert('Please select a model first');
+            return;
+        }
 
         const userMessage: Message = { role: 'user', content };
         const initialMessages = [...messages, userMessage];
@@ -22,10 +28,10 @@ export const ChatContainer: React.FC = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model: 'llama3.2',
+                    model: selectedModel,
                     messages: initialMessages,
-                    stream: true
-                })
+                    stream: true,
+                }),
             });
 
             if (!response.ok) {
@@ -73,9 +79,12 @@ export const ChatContainer: React.FC = () => {
     return (
         <div className="flex h-screen w-full bg-gray-50 text-gray-900">
             <div className="hidden md:flex flex-col w-64 bg-gray-900 text-white p-4 shrink-0">
-                <h2 className="text-xl font-bold mb-4">Local LLM</h2>
+                <h2 className="text-xl font-bold mb-6">Local LLM</h2>
                 <div className="flex-1 overflow-y-auto">
-
+                    <ModelSelector
+                        selectedModel={selectedModel}
+                        onSelectModel={setSelectedModel}
+                    />
                 </div>
             </div>
 
@@ -85,7 +94,10 @@ export const ChatContainer: React.FC = () => {
                 </div>
 
                 <div className="p-4 bg-white border-t border-gray-200 shrink-0">
-                    <MessageInput onSendMessage={handleSendMessage} disabled={isGenerating} />
+                    <MessageInput
+                        onSendMessage={handleSendMessage}
+                        disabled={isGenerating || !selectedModel}
+                    />
                 </div>
             </div>
         </div>

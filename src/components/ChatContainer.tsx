@@ -86,9 +86,15 @@ export const ChatContainer: React.FC = () => {
     };
 
     return (
-        <div className="app-shell flex h-screen w-full bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
-            <div className="app-sidebar hidden md:flex flex-col w-64 p-4 shrink-0">
-                <h2 className="app-sidebar-title text-xl font-bold mb-6">Local LLM</h2>
+        <div className="app-shell flex h-screen w-full">
+            <div className="app-sidebar hidden md:flex flex-col w-[18.5rem] p-5 shrink-0">
+                <div className="app-sidebar-top mb-8">
+                    <p className="app-sidebar-eyebrow text-xs uppercase tracking-[0.24em]">Workspace</p>
+                    <h2 className="app-sidebar-title mt-3 text-2xl font-semibold">Studio</h2>
+                    <p className="app-sidebar-copy mt-2 text-sm leading-6">
+                        Pick a local model and keep the conversation flowing in a calmer, sharper workspace.
+                    </p>
+                </div>
                 <div className="flex-1 overflow-y-auto">
                     <ModelSelector
                         selectedModel={selectedModel}
@@ -97,14 +103,14 @@ export const ChatContainer: React.FC = () => {
                 </div>
             </div>
 
-            <div className="app-main flex-1 flex flex-col h-full bg-white relative min-w-0 dark:bg-gray-900">
+            <div className="app-main flex-1 flex flex-col h-full relative min-w-0">
                 <Header />
 
-                <div className="app-messages flex-1 overflow-y-auto p-4">
+                <div className="app-messages flex-1 overflow-y-auto px-4 py-5 md:px-6">
                     <MessageList messages={messages} />
                 </div>
 
-                <div className="app-input-wrap p-4 bg-white border-t border-gray-200 shrink-0 dark:bg-gray-900 dark:border-gray-700">
+                <div className="app-input-wrap p-4 md:p-6 shrink-0">
                     <MessageInput
                         onSendMessage={handleSendMessage}
                         disabled={isGenerating || !selectedModel}

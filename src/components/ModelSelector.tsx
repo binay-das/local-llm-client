@@ -36,12 +36,12 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, onS
     if (error) return <div className="text-red-400 text-sm">{error}</div>;
 
     return (
-        <div className="flex flex-col gap-2">
+        <div className="app-model-card flex flex-col gap-3 rounded-[1.75rem] p-4">
             <label className="app-model-label text-sm font-medium">Select Model:</label>
             <select
                 value={selectedModel}
                 onChange={(e) => onSelectModel(e.target.value)}
-                className="app-model-select w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="app-model-select w-full rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
                 <option value="" disabled>Choose a model</option>
                 {models.map((model) => (

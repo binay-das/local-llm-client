@@ -17,19 +17,19 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disab
     };
 
     return (
-        <form onSubmit={handleSubmit} className="flex gap-2 w-full">
+        <form onSubmit={handleSubmit} className="app-composer flex gap-3 w-full">
             <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 disabled={disabled}
-                placeholder="Type a message..."
-                className="message-input flex-1 border border-gray-300 rounded-lg px-4 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700 dark:placeholder:text-gray-400 dark:disabled:bg-gray-800"
+                placeholder="Ask your local model something useful..."
+                className="message-input flex-1 rounded-2xl px-5 py-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
                 type="submit"
                 disabled={disabled || !input.trim()}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="message-send-button px-5 py-3 rounded-2xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 Send
             </button>

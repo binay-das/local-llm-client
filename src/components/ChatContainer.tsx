@@ -58,7 +58,11 @@ export const ChatContainer: React.FC = () => {
                     if (parsed.message?.content) {
                         setMessages((prev) => {
                             const updated = [...prev];
-                            updated[updated.length - 1].content += parsed.message.content;
+                            const lastIndex = updated.length - 1;
+                            updated[lastIndex] = {
+                                ...updated[lastIndex],
+                                content: updated[lastIndex].content + parsed.message.content
+                            };
                             return updated;
                         });
                     }
@@ -68,7 +72,11 @@ export const ChatContainer: React.FC = () => {
             console.error('Error fetching from local LLM:', error);
             setMessages((prev) => {
                 const updated = [...prev];
-                updated[updated.length - 1].content = 'Error: Failed to connect or generate response.';
+                const lastIndex = updated.length - 1;
+                updated[lastIndex] = {
+                    ...updated[lastIndex],
+                    content: 'Error: Failed to connect or generate response.'
+                };
                 return updated;
             });
         } finally {

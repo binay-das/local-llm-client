@@ -158,6 +158,54 @@ body {
   box-shadow: 0 20px 34px rgb(175 165 150 / 0.08);
 }
 
+.message-copy-button,
+.copy-toast {
+  transition: opacity 180ms ease, transform 180ms ease, background-color 220ms ease, border-color 220ms ease, color 220ms ease, box-shadow 220ms ease;
+}
+
+.message-copy-button {
+  border: 1px solid rgb(221 214 204);
+  background: rgb(255 251 246 / 0.94);
+  color: rgb(88 90 98);
+  box-shadow: 0 10px 24px rgb(175 165 150 / 0.1), inset 0 1px 0 rgb(255 255 255 / 0.75);
+  opacity: 0.82;
+  transform: translateY(0);
+  backdrop-filter: blur(8px);
+}
+
+.message-copy-button:hover {
+  transform: translateY(-1px);
+  color: rgb(41 48 58);
+  box-shadow: 0 14px 28px rgb(175 165 150 / 0.14), inset 0 1px 0 rgb(255 255 255 / 0.75);
+}
+
+.message-copy-button:focus-visible {
+  outline: 2px solid rgb(59 130 246);
+  outline-offset: 3px;
+}
+
+.message-copy-button-copied {
+  border-color: rgb(148 187 161);
+  background: rgb(236 247 239 / 0.96);
+  color: rgb(43 106 67);
+}
+
+.copy-toast {
+  opacity: 0;
+  transform: translateY(-0.5rem);
+  border: 1px solid rgb(214 225 216);
+  background:
+    radial-gradient(circle at top left, rgb(255 255 255 / 0.68), transparent 45%),
+    linear-gradient(135deg, rgb(240 248 242) 0%, rgb(226 241 232) 100%);
+  color: rgb(39 92 62);
+  box-shadow: 0 24px 50px rgb(147 170 154 / 0.18);
+}
+
+.copy-toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .message-bubble-user {
   background:
     linear-gradient(135deg, rgb(58 74 94) 0%, rgb(33 42 53) 100%);
@@ -352,6 +400,33 @@ html.dark .assistant-bubble {
   color: rgb(229 226 220);
   border-color: rgb(62 61 59);
   box-shadow: 0 24px 44px rgb(0 0 0 / 0.18);
+}
+
+html.dark .message-copy-button {
+  border-color: rgb(62 61 58);
+  background: rgb(30 32 36 / 0.92);
+  color: rgb(183 181 177);
+  box-shadow: 0 14px 30px rgb(0 0 0 / 0.18), inset 0 1px 0 rgb(255 255 255 / 0.03);
+}
+
+html.dark .message-copy-button:hover {
+  color: rgb(235 231 225);
+  box-shadow: 0 18px 36px rgb(0 0 0 / 0.22), inset 0 1px 0 rgb(255 255 255 / 0.04);
+}
+
+html.dark .message-copy-button-copied {
+  border-color: rgb(74 116 90);
+  background: rgb(28 46 36 / 0.96);
+  color: rgb(157 213 176);
+}
+
+html.dark .copy-toast {
+  border-color: rgb(57 78 65);
+  background:
+    radial-gradient(circle at top left, rgb(255 255 255 / 0.04), transparent 45%),
+    linear-gradient(135deg, rgb(26 44 35) 0%, rgb(19 31 25) 100%);
+  color: rgb(165 220 185);
+  box-shadow: 0 28px 56px rgb(0 0 0 / 0.24);
 }
 
 html.dark .message-bubble-user {

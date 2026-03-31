@@ -1,11 +1,15 @@
 import React, { useEffect, useRef } from 'react';
+import { Check, Clipboard } from 'lucide-react';
 import type { Message } from '../types';
 
 interface MessageListProps {
     messages: Message[];
+    copiedMessageIndex: number | null;
+    isGenerating: boolean;
+    onCopyMessage: (message: Message, index: number) => void;
 }
 
-export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
+export const MessageList: React.FC<MessageListProps> = ({ messages, copiedMessageIndex, isGenerating, onCopyMessage }) => {
     const bottomRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -30,22 +34,42 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
 
     return (
         <div className="flex flex-col gap-5">
-            {messages.map((msg, index) => (
-                <div
-                    key={index}
-                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'
-                        }`}
-                >
+            {messages.map((msg, index) => {
+                const isStreamingAssistant = isGenerating && msg.role === 'assistant' && index === messages.length - 1;
+                const canCopy = msg.content.trim().length > 0 && !isStreamingAssistant;
+
+                return (
                     <div
-                        className={`message-bubble max-w-[85%] px-5 py-3.5 ${msg.role === 'user'
-                                ? 'message-bubble-user rounded-[1.6rem] rounded-br-md text-white'
-                                : 'assistant-bubble rounded-[1.6rem] rounded-bl-md border'
+                        key={index}
+                        className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'
                             }`}
                     >
-                        {msg.content}
+                        <div className={`message-bubble-wrap flex max-w-[85%] flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                            <div
+                                className={`message-bubble w-full px-5 py-3.5 ${msg.role === 'user'
+                                    ? 'message-bubble-user rounded-[1.6rem] rounded-br-md text-white'
+                                    : 'assistant-bubble rounded-[1.6rem] rounded-bl-md border'
+                                    }`}
+                            >
+                                {msg.content}
+                            </div>
+                            {canCopy ? (
+                                <div className={`message-actions mt-2 flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                    <button
+                                        type="button"
+                                        className={`message-copy-button inline-flex h-8 w-8 items-center justify-center rounded-full ${copiedMessageIndex === index ? 'message-copy-button-copied' : ''}`}
+                                        onClick={() => onCopyMessage(msg, index)}
+                                        aria-label={copiedMessageIndex === index ? 'Copied message' : 'Copy message'}
+                                        title={copiedMessageIndex === index ? 'Copied' : 'Copy'}
+                                    >
+                                        {copiedMessageIndex === index ? <Check className="h-4 w-4" strokeWidth={2.1} /> : <Clipboard className="h-4 w-4" strokeWidth={1.9} />}
+                                    </button>
+                                </div>
+                            ) : null}
+                        </div>
                     </div>
-                </div>
-            ))}
+                );
+            })}
             <div ref={bottomRef} />
         </div>
     );

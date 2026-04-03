@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Check, Clipboard } from 'lucide-react';
 import type { Message } from '../types';
+import { MarkdownRenderer } from './MarkdownRenderer';
 
 interface MessageListProps {
     messages: Message[];
@@ -51,7 +52,7 @@ export const MessageList: React.FC<MessageListProps> = ({ messages, copiedMessag
                                     : 'assistant-bubble rounded-[1.6rem] rounded-bl-md border'
                                     }`}
                             >
-                                {msg.content}
+                                {msg.role === 'assistant' ? <MarkdownRenderer content={msg.content} /> : msg.content}
                             </div>
                             {canCopy ? (
                                 <div className={`message-actions mt-2 flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>

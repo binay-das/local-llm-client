@@ -159,6 +159,126 @@ body {
   box-shadow: 0 18px 34px rgb(175 165 150 / 0.12);
 }
 
+.markdown-content {
+  font-size: 0.99rem;
+  line-height: 1.72;
+  overflow-wrap: anywhere;
+}
+
+.markdown-content > *:first-child {
+  margin-top: 0;
+}
+
+.markdown-content > *:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content p,
+.markdown-content ul,
+.markdown-content ol,
+.markdown-content pre,
+.markdown-content blockquote,
+.markdown-content hr {
+  margin: 0 0 0.95rem;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  margin: 1.15rem 0 0.7rem;
+  line-height: 1.25;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
+.markdown-content h1 {
+  font-size: 1.45rem;
+}
+
+.markdown-content h2 {
+  font-size: 1.28rem;
+}
+
+.markdown-content h3 {
+  font-size: 1.14rem;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  padding-left: 1.35rem;
+}
+
+.markdown-content li + li {
+  margin-top: 0.35rem;
+}
+
+.markdown-content code {
+  font-family: "IBM Plex Mono", "SFMono-Regular", "Consolas", monospace;
+  font-size: 0.92em;
+}
+
+.markdown-content p code,
+.markdown-content li code,
+.markdown-content blockquote code,
+.markdown-content td code {
+  display: inline-block;
+  padding: 0.08rem 0.45rem;
+  border-radius: 0.5rem;
+  background: rgb(255 248 238 / 0.86);
+  border: 1px solid rgb(221 209 192 / 0.9);
+}
+
+.markdown-content pre {
+  position: relative;
+  overflow-x: auto;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgb(27 31 36);
+  color: rgb(244 238 230);
+  border: 1px solid rgb(74 78 84 / 0.65);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
+}
+
+.markdown-content pre code {
+  display: block;
+  white-space: pre;
+  line-height: 1.6;
+}
+
+.markdown-content .code-language {
+  display: inline-flex;
+  margin-bottom: 0.75rem;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.08);
+  color: rgb(206 212 219);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.markdown-content blockquote {
+  padding: 0.2rem 0 0.2rem 1rem;
+  border-left: 3px solid rgb(168 143 89 / 0.82);
+  color: rgb(79 76 71);
+}
+
+.markdown-content a {
+  color: rgb(52 84 132);
+  text-decoration: underline;
+  text-decoration-thickness: 1.4px;
+  text-underline-offset: 0.16em;
+}
+
+.markdown-content hr {
+  border: 0;
+  border-top: 1px solid rgb(206 194 177);
+}
+
 .message-copy-button,
 .copy-toast {
   transition: opacity 180ms ease, transform 180ms ease, background-color 220ms ease, border-color 220ms ease, color 220ms ease, box-shadow 220ms ease;
@@ -401,6 +521,38 @@ html.dark .assistant-bubble {
   color: rgb(229 226 220);
   border-color: rgb(62 61 59);
   box-shadow: 0 24px 44px rgb(0 0 0 / 0.18);
+}
+
+html.dark .markdown-content p code,
+html.dark .markdown-content li code,
+html.dark .markdown-content blockquote code,
+html.dark .markdown-content td code {
+  background: rgb(255 255 255 / 0.04);
+  border-color: rgb(86 84 81 / 0.95);
+}
+
+html.dark .markdown-content pre {
+  background: rgb(16 19 23);
+  color: rgb(237 231 222);
+  border-color: rgb(70 70 68 / 0.95);
+}
+
+html.dark .markdown-content .code-language {
+  background: rgb(255 255 255 / 0.05);
+  color: rgb(194 193 189);
+}
+
+html.dark .markdown-content blockquote {
+  border-left-color: rgb(153 124 88 / 0.92);
+  color: rgb(182 176 168);
+}
+
+html.dark .markdown-content a {
+  color: rgb(141 184 245);
+}
+
+html.dark .markdown-content hr {
+  border-top-color: rgb(73 72 69);
 }
 
 html.dark .message-copy-button {

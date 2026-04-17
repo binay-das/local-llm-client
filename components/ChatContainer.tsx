@@ -37,7 +37,11 @@ export const ChatContainer: React.FC = () => {
                 const res = await fetch(`/api/chats/${activeChatId}`);
                 if (res.ok) {
                     const data = await res.json();
-                    setMessages(data.messages || []);
+                    const formattedMessages = (data.messages || []).map((m: any) => ({
+                        ...m,
+                        role: m.role ? m.role.toLowerCase() : 'user'
+                    }));
+                    setMessages(formattedMessages);
                     if (data.modelId) {
                         setSelectedModel(data.modelId);
                     }

@@ -1,0 +1,60 @@
+generator client {
+  provider        = "prisma-client-js"
+}
+
+datasource db {
+  provider   = "postgresql"
+}
+
+model Chat {
+  id        String    @id @default(cuid())
+  title     String    @default("New Chat")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  messages  Message[]
+  
+  modelId   String?
+  modelName String?   
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  
+  role      Role     @default(USER) 
+  content   String   @db.Text
+  
+  createdAt DateTime @default(now())
+
+  context   Context? 
+}
+
+enum Role {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+
+model Context {
+  id        String   @id @default(cuid())
+  messageId String?  @unique
+  message   Message? @relation(fields: [messageId], references: [id])
+  
+  content   String   @db.Text
+  
+  embedding Unsupported("vector(768)")?
+
+  createdAt DateTime @default(now())
+
+  @@index([embedding], map: "embedding_idx")
+}
+
+model LocalModel {
+  id          String   @id @default(cuid())
+  name        String   @unique 
+  size        BigInt?
+  digest      String?
+  modifiedAt  DateTime @default(now())
+}

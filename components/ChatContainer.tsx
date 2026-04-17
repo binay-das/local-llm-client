@@ -104,7 +104,7 @@ export const ChatContainer: React.FC = () => {
                 body: JSON.stringify({
                     chatId: currentChatId,
                     model: selectedModel,
-                    messages: messages.map(m => ({ role: m.role, content: m.content })),
+                    messages: messages.map(m => ({ role: m.role.toLowerCase(), content: m.content })),
                     prompt: content,
                 }),
             });

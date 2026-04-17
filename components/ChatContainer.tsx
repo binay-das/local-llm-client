@@ -3,14 +3,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
-import { ModelSelector } from './ModelSelector';
 import { Header } from './Header';
+import { Sidebar } from './Sidebar';
 import { Message } from '@/types';
 
 export const ChatContainer: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isGenerating, setIsGenerating] = useState(false);
     const [selectedModel, setSelectedModel] = useState<string>('');
+    const [activeChatId, setActiveChatId] = useState<string | null>(null);
+    
     const [copiedMessageIndex, setCopiedMessageIndex] = useState<number | null>(null);
     const [showCopyToast, setShowCopyToast] = useState(false);
     const copyResetTimeoutRef = useRef<number | null>(null);
@@ -18,14 +20,40 @@ export const ChatContainer: React.FC = () => {
 
     useEffect(() => {
         return () => {
-            if (copyResetTimeoutRef.current) {
-                window.clearTimeout(copyResetTimeoutRef.current);
-            }
-            if (toastTimeoutRef.current) {
-                window.clearTimeout(toastTimeoutRef.current);
-            }
+            if (copyResetTimeoutRef.current) window.clearTimeout(copyResetTimeoutRef.current);
+            if (toastTimeoutRef.current) window.clearTimeout(toastTimeoutRef.current);
         };
     }, []);
+
+    // fetch messages when activeChatId changes
+    useEffect(() => {
+        if (!activeChatId) {
+            setMessages([]);
+            return;
+        }
+
+        const fetchSelectedChat = async () => {
+            try {
+                const res = await fetch(`/api/chats/${activeChatId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setMessages(data.messages || []);
+                    if (data.modelId) {
+                        setSelectedModel(data.modelId);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load chat", err);
+            }
+        };
+
+        fetchSelectedChat();
+    }, [activeChatId]);
+
+    const handleNewChat = () => {
+        setActiveChatId(null);
+        setMessages([]);
+    };
 
     const handleSendMessage = async (content: string) => {
         if (!selectedModel) {
@@ -33,22 +61,47 @@ export const ChatContainer: React.FC = () => {
             return;
         }
 
+        let currentChatId = activeChatId;
+
+        // create new chat if this is the first message
+        if (!currentChatId) {
+            try {
+                const res = await fetch('/api/chats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        title: content.slice(0, 30) + (content.length > 30 ? "..." : ""),
+                        modelId: selectedModel,
+                        modelName: selectedModel
+                    })
+                });
+                if (res.ok) {
+                    const newChat = await res.json();
+                    currentChatId = newChat.id;
+                    setActiveChatId(newChat.id);
+                }
+            } catch (e) {
+                console.error("Failed to create chat", e);
+                return;
+            }
+        }
+
         const userMessage: Message = { role: 'user', content };
         const initialMessages = [...messages, userMessage];
         setMessages(initialMessages);
         setIsGenerating(true);
 
-
         setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
 
         try {
-            const response = await fetch('http://localhost:11434/api/chat', {
+            const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    chatId: currentChatId,
                     model: selectedModel,
-                    messages: initialMessages,
-                    stream: true,
+                    messages: messages.map(m => ({ role: m.role, content: m.content })),
+                    prompt: content,
                 }),
             });
 
@@ -61,33 +114,25 @@ export const ChatContainer: React.FC = () => {
             }
 
             const reader = response.body.getReader();
-            const decoder = new TextDecoder();
+            const decoder = new TextDecoder("utf-8");
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
 
                 const chunk = decoder.decode(value, { stream: true });
-
-                const lines = chunk.split('\n').filter((line) => line.trim() !== '');
-
-                for (const line of lines) {
-                    const parsed = JSON.parse(line);
-                    if (parsed.message?.content) {
-                        setMessages((prev) => {
-                            const updated = [...prev];
-                            const lastIndex = updated.length - 1;
-                            updated[lastIndex] = {
-                                ...updated[lastIndex],
-                                content: updated[lastIndex].content + parsed.message.content
-                            };
-                            return updated;
-                        });
-                    }
-                }
+                setMessages((prev) => {
+                    const updated = [...prev];
+                    const lastIndex = updated.length - 1;
+                    updated[lastIndex] = {
+                        ...updated[lastIndex],
+                        content: updated[lastIndex].content + chunk
+                    };
+                    return updated;
+                });
             }
         } catch (error) {
-            console.error('Error fetching from local LLM:', error);
+            console.error('Error fetching stream:', error);
             setMessages((prev) => {
                 const updated = [...prev];
                 const lastIndex = updated.length - 1;
@@ -103,29 +148,18 @@ export const ChatContainer: React.FC = () => {
     };
 
     const handleCopyMessage = async (message: Message, index: number) => {
-        if (!message.content.trim()) {
-            return;
-        }
+        if (!message.content.trim()) return;
 
         try {
             await navigator.clipboard.writeText(message.content);
             setCopiedMessageIndex(index);
             setShowCopyToast(true);
 
-            if (copyResetTimeoutRef.current) {
-                window.clearTimeout(copyResetTimeoutRef.current);
-            }
-            if (toastTimeoutRef.current) {
-                window.clearTimeout(toastTimeoutRef.current);
-            }
+            if (copyResetTimeoutRef.current) window.clearTimeout(copyResetTimeoutRef.current);
+            if (toastTimeoutRef.current) window.clearTimeout(toastTimeoutRef.current);
 
-            copyResetTimeoutRef.current = window.setTimeout(() => {
-                setCopiedMessageIndex(null);
-            }, 2200);
-
-            toastTimeoutRef.current = window.setTimeout(() => {
-                setShowCopyToast(false);
-            }, 2200);
+            copyResetTimeoutRef.current = window.setTimeout(() => setCopiedMessageIndex(null), 2200);
+            toastTimeoutRef.current = window.setTimeout(() => setShowCopyToast(false), 2200);
         } catch (error) {
             console.error('Error copying message:', error);
         }
@@ -133,21 +167,13 @@ export const ChatContainer: React.FC = () => {
 
     return (
         <div className="flex h-screen w-full bg-linear-to-br from-[#f6f4ef] via-[#faf8f3] to-[#e8e4db] dark:bg-linear-to-br dark:from-[#0d1014] dark:via-[#13171d] dark:to-[#0a0c0f]">
-            <div className="hidden md:flex flex-col w-72 p-5 shrink-0 bg-linear-to-b from-[#faf8f3] to-[#f0ece3] dark:from-[#191d23] dark:to-[#0f1115] border-r border-[#ded8cb] dark:border-[#303338] text-[#212731] dark:text-[#dcd8d4]">
-                <div className="mb-8">
-                    <p className="text-xs uppercase tracking-[0.24em] text-[#7e6a4f] dark:text-[#9c896f]">Workspace</p>
-                    <h2 className="mt-3 text-2xl font-semibold text-[#171d25] dark:text-[#f4efe8]">Studio</h2>
-                    <p className="mt-2 text-sm leading-6 text-[#595c66] dark:text-[#9a9a9c]">
-                        Pick a local model and keep the conversation flowing in a calmer, sharper workspace.
-                    </p>
-                </div>
-                <div className="flex-1 overflow-y-auto">
-                    <ModelSelector
-                        selectedModel={selectedModel}
-                        onSelectModel={setSelectedModel}
-                    />
-                </div>
-            </div>
+            <Sidebar 
+                selectedModel={selectedModel}
+                onSelectModel={setSelectedModel}
+                activeChatId={activeChatId}
+                onSelectChat={setActiveChatId}
+                onNewChat={handleNewChat}
+            />
 
             <div className="flex-1 flex flex-col h-full relative min-w-0 bg-[#fffcf7]/40 dark:bg-[#101218]/60 backdrop-blur-sm">
                 <Header />

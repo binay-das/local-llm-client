@@ -15,13 +15,13 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, onS
     useEffect(() => {
         const fetchModels = async () => {
             try {
-                const response = await fetch('http://localhost:11434/api/tags');
+                const response = await fetch('/api/models');
                 if (!response.ok) throw new Error('Network error');
                 const data = await response.json();
-                setModels(data.models || []);
+                setModels(Array.isArray(data) ? data : []);
 
-                if (!selectedModel && data.models && data.models.length > 0) {
-                    onSelectModel(data.models[0].name);
+                if (!selectedModel && Array.isArray(data) && data.length > 0) {
+                    onSelectModel(data[0].name);
                 }
             } catch (err) {
                 setError('Failed to fetch models. Is Ollama running?');

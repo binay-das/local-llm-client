@@ -1,5 +1,6 @@
+"use client";
+import { Model } from '@/types';
 import React, { useEffect, useState } from 'react';
-import type { Model } from '../types';
 
 interface ModelSelectorProps {
     selectedModel: string;
@@ -32,16 +33,16 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, onS
         fetchModels();
     }, [selectedModel, onSelectModel]);
 
-    if (loading) return <div className="app-model-hint text-sm">Loading models...</div>;
-    if (error) return <div className="text-red-400 text-sm">{error}</div>;
+    if (loading) return <div className="text-sm text-[#757069] dark:text-[#88888c]">Loading models...</div>;
+    if (error) return <div className="text-sm text-red-400">{error}</div>;
 
     return (
-        <div className="app-model-card flex flex-col gap-3 rounded-[1.75rem] p-4">
-            <label className="app-model-label text-sm font-medium">Select Model:</label>
+        <div className="flex flex-col gap-3 rounded-[1.75rem] p-4 bg-[#fffcf7]/50 dark:bg-[#16191e]/70 border border-[#e4dccf] dark:border-[#3c3f44] shadow-md dark:shadow-lg">
+            <label className="text-sm font-medium text-[#5f5442] dark:text-[#c0b29d]">Select Model:</label>
             <select
                 value={selectedModel}
                 onChange={(e) => onSelectModel(e.target.value)}
-                className="app-model-select w-full rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-2xl px-4 py-3 bg-[#fffbf6] dark:bg-[#1b1e24] text-[#1f2937] dark:text-[#eee8e0] border border-[#dad0c0] dark:border-[#404247] focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
                 <option value="" disabled>Choose a model</option>
                 {models.map((model) => (

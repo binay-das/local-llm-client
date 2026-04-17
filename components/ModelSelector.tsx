@@ -18,10 +18,14 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, onS
                 const response = await fetch('/api/models');
                 if (!response.ok) throw new Error('Network error');
                 const data = await response.json();
-                setModels(Array.isArray(data) ? data : []);
+                const modelArray = Array.isArray(data) ? data : [];
+                setModels(modelArray);
 
-                if (!selectedModel && Array.isArray(data) && data.length > 0) {
-                    onSelectModel(data[0].name);
+                if (modelArray.length > 0) {
+                    const modelExists = modelArray.some((m: Model) => m.name === selectedModel);
+                    if (!selectedModel || (!modelExists && selectedModel !== '')) {
+                        onSelectModel(modelArray[0].name);
+                    }
                 }
             } catch (err) {
                 setError('Failed to fetch models. Is Ollama running?');

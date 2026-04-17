@@ -132,8 +132,8 @@ export const ChatContainer: React.FC = () => {
     };
 
     return (
-        <div className="flex h-screen w-full bg-gradient-to-br from-[#f6f4ef] via-[#faf8f3] to-[#e8e4db] dark:bg-gradient-to-br dark:from-[#0d1014] dark:via-[#13171d] dark:to-[#0a0c0f]">
-            <div className="hidden md:flex flex-col w-72 p-5 shrink-0 bg-gradient-to-b from-[#faf8f3] to-[#f0ece3] dark:from-[#191d23] dark:to-[#0f1115] border-r border-[#ded8cb] dark:border-[#303338] text-[#212731] dark:text-[#dcd8d4]">
+        <div className="flex h-screen w-full bg-linear-to-br from-[#f6f4ef] via-[#faf8f3] to-[#e8e4db] dark:bg-linear-to-br dark:from-[#0d1014] dark:via-[#13171d] dark:to-[#0a0c0f]">
+            <div className="hidden md:flex flex-col w-72 p-5 shrink-0 bg-linear-to-b from-[#faf8f3] to-[#f0ece3] dark:from-[#191d23] dark:to-[#0f1115] border-r border-[#ded8cb] dark:border-[#303338] text-[#212731] dark:text-[#dcd8d4]">
                 <div className="mb-8">
                     <p className="text-xs uppercase tracking-[0.24em] text-[#7e6a4f] dark:text-[#9c896f]">Workspace</p>
                     <h2 className="mt-3 text-2xl font-semibold text-[#171d25] dark:text-[#f4efe8]">Studio</h2>
@@ -152,7 +152,7 @@ export const ChatContainer: React.FC = () => {
             <div className="flex-1 flex flex-col h-full relative min-w-0 bg-[#fffcf7]/40 dark:bg-[#101218]/60 backdrop-blur-sm">
                 <Header />
 
-                <div className={`fixed right-4 top-4 z-80 rounded-2xl px-4 py-3 text-sm font-medium md:right-6 transition-all duration-200 ${showCopyToast ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'} bg-gradient-to-br from-[#f0f8f2] to-[#e2f1e8] dark:from-[#1a2c22] dark:to-[#131f1a] border border-[#d6e1d8] dark:border-[#394e41] text-[#275c3e] dark:text-[#a5dcb9] shadow-lg dark:shadow-xl`}>
+                <div className={`fixed right-4 top-4 z-80 rounded-2xl px-4 py-3 text-sm font-medium md:right-6 transition-all duration-200 ${showCopyToast ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'} bg-linear-to-br from-[#f0f8f2] to-[#e2f1e8] dark:from-[#1a2c22] dark:to-[#131f1a] border border-[#d6e1d8] dark:border-[#394e41] text-[#275c3e] dark:text-[#a5dcb9] shadow-lg dark:shadow-xl`}>
                     Copied to clipboard
                 </div>
 

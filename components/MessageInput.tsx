@@ -1,39 +1,83 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Paperclip, Mic, ArrowRight } from 'lucide-react';
 
 interface MessageInputProps {
     onSendMessage: (content: string) => void;
     disabled?: boolean;
+    placeholder?: string;
 }
 
-export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disabled }) => {
+export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disabled, placeholder }) => {
     const [input, setInput] = useState('');
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = (e?: React.FormEvent) => {
+        e?.preventDefault();
         if (input.trim() && !disabled) {
             onSendMessage(input.trim());
             setInput('');
+            if (textareaRef.current) {
+                textareaRef.current.style.height = 'auto';
+            }
         }
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSubmit();
+        }
+    };
+
+    useEffect(() => {
+        const ta = textareaRef.current;
+        if (!ta) return;
+        ta.style.height = 'auto';
+        ta.style.height = Math.min(ta.scrollHeight, 160) + 'px';
+    }, [input]);
+
     return (
-        <form onSubmit={handleSubmit} className="flex gap-3 w-full rounded-[1.75rem] p-[0.65rem] bg-[#fffbf6]/60 dark:bg-[#12141a]/70 border border-[#e3dbcf] dark:border-[#35383c] shadow-lg dark:shadow-xl">
-            <input
-                type="text"
+        <form onSubmit={handleSubmit} className="relative flex items-end gap-2 rounded-2xl bg-[#1a1d21] border border-[#2e3238] px-3 py-2.5 shadow-xl">
+            {/* Attachment */}
+            <button
+                type="button"
+                className="shrink-0 p-1.5 text-[#4b5563] hover:text-[#9ca3af] transition-colors rounded-lg"
+                aria-label="Attach file"
+            >
+                <Paperclip size={18} strokeWidth={1.8} />
+            </button>
+
+            {/* Textarea */}
+            <textarea
+                ref={textareaRef}
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
                 disabled={disabled}
-                placeholder="Ask your local model something useful..."
-                className="flex-1 rounded-2xl px-5 py-3.5 bg-[#fffcf7] dark:bg-[#1e2024] text-[#1f2937] dark:text-[#ebe7df] border border-[#dfd7c8] dark:border-[#3d3e42] placeholder:text-[#86868a] dark:placeholder:text-[#878785] focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-[#f2ece4] dark:disabled:bg-[#1d1f22]"
+                placeholder={placeholder || 'Message...'}
+                rows={1}
+                className="flex-1 resize-none bg-transparent text-[#e5e7eb] placeholder:text-[#4b5563] text-sm leading-relaxed focus:outline-none disabled:opacity-40 min-h-[28px] max-h-[160px] py-1"
             />
+
+            {/* Mic */}
+            <button
+                type="button"
+                className="shrink-0 p-1.5 text-[#4b5563] hover:text-[#9ca3af] transition-colors rounded-lg"
+                aria-label="Voice input"
+            >
+                <Mic size={18} strokeWidth={1.8} />
+            </button>
+
+            {/* Send */}
             <button
                 type="submit"
                 disabled={disabled || !input.trim()}
-                className="min-w-[6rem] px-5 py-3 rounded-2xl font-medium bg-gradient-to-br from-[#2a3441] to-[#43586f] dark:from-[#84694f] dark:to-[#5c4837] text-[#faf7f1] dark:text-[#fcf7f0] shadow-md dark:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:-translate-y-0.5"
+                className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-[#6366f1] hover:bg-[#4f52d4] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-150"
+                aria-label="Send message"
             >
-                Send
+                <ArrowRight size={15} strokeWidth={2.5} className="text-white" />
             </button>
         </form>
     );

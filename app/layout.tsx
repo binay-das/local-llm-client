@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "Local LLM Client",
-  description: "Chat with local models in a cleaner workspace",
+  description: "Chat with local AI models privately on your machine via Ollama",
 };
 
 export default function RootLayout({
@@ -13,11 +12,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="min-h-full flex flex-col antialiased">
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="antialiased h-screen overflow-hidden bg-[#0d0f11]">
+        {children}
       </body>
     </html>
   );

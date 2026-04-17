@@ -1,7 +1,8 @@
+"use client";
+
+import { Chat, Model } from '@/types';
 import React, { useEffect, useState } from 'react';
-import { ModelSelector } from './ModelSelector';
-import { Chat } from '@/types';
-import { MessageSquare, Plus, Trash2 } from 'lucide-react';
+import { Clock, Plus, Settings, HelpCircle, Trash2, Bot } from 'lucide-react';
 
 interface SidebarProps {
     selectedModel: string;
@@ -19,88 +20,140 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onNewChat
 }) => {
     const [chats, setChats] = useState<Chat[]>([]);
+    const [models, setModels] = useState<Model[]>([]);
 
     const fetchChats = async () => {
         try {
             const res = await fetch('/api/chats');
-            if (res.ok) {
-                const data = await res.json();
-                setChats(data);
-            }
-        } catch (error) {
-            console.error('Error fetching chats:', error);
-        }
+            if (res.ok) setChats(await res.json());
+        } catch (e) { console.error(e); }
     };
 
     useEffect(() => {
         fetchChats();
     }, [activeChatId]);
 
+    useEffect(() => {
+        const fetchModels = async () => {
+            try {
+                const res = await fetch('/api/models');
+                if (!res.ok) return;
+                const data = await res.json();
+                const arr: Model[] = Array.isArray(data) ? data : [];
+                setModels(arr);
+                if (arr.length > 0) {
+                    const exists = arr.some(m => m.name === selectedModel);
+                    if (!selectedModel || !exists) onSelectModel(arr[0].name);
+                }
+
+            } catch (e) { 
+                console.error(e); 
+            }
+        };
+        fetchModels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     const handleDeleteChat = async (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
         try {
             await fetch(`/api/chats/${id}`, { method: 'DELETE' });
-            if (activeChatId === id) {
-                onNewChat();
-            } else {
-                fetchChats();
-            }
-        } catch (error) {
-            console.error('Failed to delete chat', error);
-        }
+            if (activeChatId === id) onNewChat();
+            else fetchChats();
+        } catch (e) { console.error(e); }
     };
 
     return (
-        <div className="hidden md:flex flex-col w-72 p-5 shrink-0 bg-linear-to-b from-[#faf8f3] to-[#f0ece3] dark:from-[#191d23] dark:to-[#0f1115] border-r border-[#ded8cb] dark:border-[#303338] text-[#212731] dark:text-[#dcd8d4]">
-            <div className="mb-6 flex items-center justify-between">
-                <div>
-                    <h2 className="text-xl font-semibold text-[#171d25] dark:text-[#f4efe8]">Ollama Client</h2>
+        <div className="hidden md:flex flex-col w-[210px] shrink-0 bg-[#111315] border-r border-[#2a2d31] text-white h-full">
+            <div className="px-5 pt-6 pb-4">
+                <div className="flex items-center gap-3 mb-1">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shrink-0">
+                        <Bot size={16} className="text-white" />
+                    </div>
+                    <div>
+                        <p className="text-sm font-bold leading-tight text-white">Local LLM</p>
+                        <p className="text-[10px] text-[#6b7280] leading-tight">Local Intelligence</p>
+                    </div>
                 </div>
-                <button 
-                    onClick={onNewChat}
-                    className="p-2 rounded-lg bg-linear-to-br from-white to-[#e8e3db] dark:from-[#2a2e36] dark:to-[#1f2228] border border-[#d6cfc2] dark:border-[#40444b] hover:shadow-md transition-all text-[#4a5568] dark:text-[#a0aec0]"
-                    title="New Chat"
-                >
-                    <Plus size={18} />
-                </button>
-            </div>
-            
-            <div className="mb-6">
-                <ModelSelector
-                    selectedModel={selectedModel}
-                    onSelectModel={onSelectModel}
-                />
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-                <h3 className="text-xs uppercase tracking-wider text-[#7e8590] dark:text-[#6b7280] mb-3 font-semibold">Chat History</h3>
-                {chats.map(chat => (
-                    <div 
-                        key={chat.id}
-                        onClick={() => onSelectChat(chat.id)}
-                        className={`group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-colors ${activeChatId === chat.id ? 'bg-[#e2e8f0] dark:bg-[#2d3748] border border-[#cbd5e1] dark:border-[#4a5568]' : 'hover:bg-[#f1f5f9] dark:hover:bg-[#1a202c] border border-transparent'}`}
-                    >
-                        <div className="flex items-center gap-3 overflow-hidden">
-                            <MessageSquare size={16} className={activeChatId === chat.id ? 'text-[#3b82f6]' : 'text-[#64748b]'} />
-                            <div className="flex flex-col truncate">
-                                <span className={`text-sm truncate ${activeChatId === chat.id ? 'font-medium text-[#0f172a] dark:text-[#f8fafc]' : 'text-[#334155] dark:text-[#cbd5e1]'} `}>
-                                    {chat.title}
-                                </span>
-                                {(chat.modelName || chat.modelId) && (
-                                    <span className="text-[10px] text-[#64748b] dark:text-[#94a3b8] truncate">
-                                        {chat.modelName || chat.modelId}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                        <button 
-                            onClick={(e) => handleDeleteChat(e, chat.id)}
-                            className="opacity-0 group-hover:opacity-100 p-1.5 text-[#ef4444] hover:bg-[#fee2e2] dark:hover:bg-[#7f1d1d] rounded-md transition-all"
-                        >
-                            <Trash2 size={14} />
-                        </button>
+            {models.length > 0 && (
+                <div className="px-3 mb-4">
+                    <div className="flex flex-wrap gap-1.5">
+                        {models.slice(0, 4).map(m => {
+                            const shortName = m.name.split(':')[0].toUpperCase();
+                            const isActive = m.name === selectedModel;
+                            return (
+                                <button
+                                    key={m.name}
+                                    onClick={() => onSelectModel(m.name)}
+                                    title={m.name}
+                                    className={`text-[10px] font-semibold px-2.5 py-1 rounded transition-all duration-150 ${
+                                        isActive
+                                            ? 'text-white border-b-2 border-white bg-transparent'
+                                            : 'text-[#6b7280] hover:text-[#9ca3af] border-b-2 border-transparent'
+                                    }`}
+                                >
+                                    {shortName}
+                                </button>
+                            );
+                        })}
                     </div>
-                ))}
+                </div>
+            )}
+
+            <div className="px-3 mb-5">
+                <button
+                    onClick={onNewChat}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#1f2327] hover:bg-[#272b30] border border-[#2e3238] text-sm text-[#d1d5db] transition-all duration-150 font-medium"
+                >
+                    <Plus size={15} strokeWidth={2.5} />
+                    New Chat
+                </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-3 min-h-0">
+                <p className="text-[10px] uppercase tracking-[0.12em] text-[#4b5563] font-semibold mb-2 px-1">Recent</p>
+                <div className="space-y-0.5">
+                    {chats.map(chat => (
+                        <div
+                            key={chat.id}
+                            onClick={() => onSelectChat(chat.id)}
+                            className={`group flex items-center justify-between gap-2 px-2.5 py-2 rounded-md cursor-pointer transition-all duration-100 ${
+                                activeChatId === chat.id
+                                    ? 'bg-[#1f2327] text-white'
+                                    : 'text-[#9ca3af] hover:bg-[#1a1d21] hover:text-[#d1d5db]'
+                            }`}
+                        >
+                            <div className="flex items-center gap-2 overflow-hidden">
+                                <Clock size={13} className="shrink-0 text-[#4b5563]" />
+                                <div className="flex flex-col overflow-hidden">
+                                    <span className="text-xs truncate leading-tight">{chat.title}</span>
+                                    {(chat.modelName || chat.modelId) && (
+                                        <span className="text-[9px] text-[#4b5563] truncate">{chat.modelName || chat.modelId}</span>
+                                    )}
+                                </div>
+                            </div>
+                            <button
+                                onClick={(e) => handleDeleteChat(e, chat.id)}
+                                className="opacity-0 group-hover:opacity-100 p-1 rounded text-[#ef4444] hover:bg-[#3a1a1a] transition-all shrink-0"
+                            >
+                                <Trash2 size={11} />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="px-3 py-4 border-t border-[#1e2226] space-y-0.5">
+                <button className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[#6b7280] hover:text-[#d1d5db] hover:bg-[#1a1d21] transition-all text-xs">
+                    <Settings size={14} />
+                    Settings
+                </button>
+                <button className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[#6b7280] hover:text-[#d1d5db] hover:bg-[#1a1d21] transition-all text-xs">
+                    <HelpCircle size={14} />
+                    Help
+                </button>
             </div>
         </div>
     );

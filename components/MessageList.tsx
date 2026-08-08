@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
-import { Copy, Check, Bot } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Copy, Check, Bot, Pencil, RotateCw } from 'lucide-react';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { Message } from '@/types';
 
@@ -10,6 +10,8 @@ interface MessageListProps {
     copiedMessageIndex: number | null;
     isGenerating: boolean;
     onCopyMessage: (message: Message, index: number) => void;
+    onEditMessage: (message: Message, index: number, newContent: string) => void;
+    onRegenerateMessage: (message: Message, index: number) => void;
     selectedModel?: string;
 }
 
@@ -18,9 +20,13 @@ export const MessageList: React.FC<MessageListProps> = ({
     copiedMessageIndex,
     isGenerating,
     onCopyMessage,
+    onEditMessage,
+    onRegenerateMessage,
     selectedModel,
 }) => {
     const bottomRef = useRef<HTMLDivElement>(null);
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [editContent, setEditContent] = useState<string>('');
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -28,10 +34,27 @@ export const MessageList: React.FC<MessageListProps> = ({
 
     const modelShortName = selectedModel ? selectedModel.split(':')[0] : 'AI';
 
+    const handleStartEdit = (msg: Message, index: number) => {
+        setEditingIndex(index);
+        setEditContent(msg.content);
+    };
+
+    const handleCancelEdit = () => {
+        setEditingIndex(null);
+        setEditContent('');
+    };
+
+    const handleSaveEdit = (index: number) => {
+        if (!editContent.trim() || isGenerating) return;
+        const targetMsg = messages[index];
+        const trimmed = editContent.trim();
+        setEditingIndex(null);
+        onEditMessage(targetMsg, index, trimmed);
+    };
+
     if (messages.length === 0) {
         return (
             <div className="flex flex-col h-full items-center justify-center text-center px-6 select-none">
-                {/* Bot icon circle */}
                 <div className="w-14 h-14 rounded-full bg-[#1f2327] border border-[#2e3238] flex items-center justify-center mb-6 shadow-lg">
                     <Bot size={26} className="text-[#6366f1]" />
                 </div>
@@ -54,30 +77,99 @@ export const MessageList: React.FC<MessageListProps> = ({
                 const canCopy = msg.content.trim().length > 0 && !isStreamingAssistant;
 
                 if (isUser) {
+                    const isEditingThis = editingIndex === index;
+
+                    if (isEditingThis) {
+                        return (
+                            <div key={index} className="flex justify-end w-full">
+                                <div className="w-full max-w-[85%] bg-[#181a1d] border border-[#6366f1]/50 rounded-2xl p-3.5 flex flex-col gap-2.5 shadow-xl">
+                                    <textarea
+                                        value={editContent}
+                                        onChange={(e) => setEditContent(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                handleSaveEdit(index);
+                                            } else if (e.key === 'Escape') {
+                                                handleCancelEdit();
+                                            }
+                                        }}
+                                        className="w-full bg-[#111315] text-[#e5e7eb] text-sm p-3 rounded-xl border border-[#2e3238] focus:outline-none focus:border-[#6366f1] resize-y min-h-[80px] leading-relaxed"
+                                        placeholder="Edit prompt..."
+                                        autoFocus
+                                    />
+                                    <div className="flex justify-end items-center gap-2 text-xs font-medium">
+                                        <button
+                                            onClick={handleCancelEdit}
+                                            className="px-3 py-1.5 rounded-lg text-[#9ca3af] hover:text-white hover:bg-[#272b30] transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={() => handleSaveEdit(index)}
+                                            disabled={!editContent.trim() || isGenerating}
+                                            className="px-4 py-1.5 rounded-lg bg-[#6366f1] hover:bg-[#4f46e5] text-white disabled:opacity-50 transition-colors shadow-sm font-semibold"
+                                        >
+                                            Save &amp; Submit
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    }
+
                     return (
-                        <div key={index} className="flex justify-end">
-                            <div className="max-w-[70%] bg-[#1f2327] border border-[#2e3238] rounded-2xl rounded-tr-md px-4 py-3 text-sm text-[#e5e7eb] leading-relaxed">
+                        <div key={index} className="group flex flex-col items-end gap-1.5">
+                            <div className="max-w-[70%] bg-[#1f2327] border border-[#2e3238] rounded-2xl rounded-tr-md px-4 py-3 text-sm text-[#e5e7eb] leading-relaxed shadow-xs">
                                 {msg.content}
+                            </div>
+                            {/* User action bar */}
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-center gap-2 px-1">
+                                {!isGenerating && (
+                                    <button
+                                        onClick={() => handleStartEdit(msg, index)}
+                                        title="Edit message"
+                                        className="inline-flex items-center gap-1 text-[10px] text-[#6b7280] hover:text-[#a5b4fc] transition-colors"
+                                    >
+                                        <Pencil size={12} />
+                                        <span>Edit</span>
+                                    </button>
+                                )}
+                                {canCopy && (
+                                    <button
+                                        onClick={() => onCopyMessage(msg, index)}
+                                        title="Copy message"
+                                        className="inline-flex items-center gap-1 text-[10px] text-[#6b7280] hover:text-[#9ca3af] transition-colors"
+                                    >
+                                        {copiedMessageIndex === index ? (
+                                            <>
+                                                <Check size={12} className="text-[#10b981]" />
+                                                <span className="text-[#10b981]">Copied</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Copy size={12} />
+                                                <span>Copy</span>
+                                            </>
+                                        )}
+                                    </button>
+                                )}
                             </div>
                         </div>
                     );
                 }
 
-                // Assistant message
                 return (
-                    <div key={index} className="flex items-start gap-3">
-                        {/* Avatar */}
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shrink-0 mt-0.5 shadow-md">
+                    <div key={index} className="group flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-linear-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shrink-0 mt-0.5 shadow-md">
                             <Bot size={15} className="text-white" />
                         </div>
 
                         <div className="flex-1 min-w-0">
-                            {/* Model name */}
                             <p className="text-xs font-semibold text-[#6b7280] mb-1.5 uppercase tracking-wide">
                                 {modelShortName}
                             </p>
 
-                            {/* Content */}
                             <div className="text-sm text-[#d1d5db] leading-relaxed">
                                 {msg.content.trim() === '' && isStreamingAssistant ? (
                                     <div className="flex gap-1 items-center py-1">
@@ -90,17 +182,37 @@ export const MessageList: React.FC<MessageListProps> = ({
                                 )}
                             </div>
 
-                            {/* Copy button */}
                             {canCopy && (
-                                <button
-                                    onClick={() => onCopyMessage(msg, index)}
-                                    className="mt-2 inline-flex items-center gap-1.5 text-[10px] text-[#4b5563] hover:text-[#9ca3af] transition-colors"
-                                >
-                                    {copiedMessageIndex === index
-                                        ? <><Check size={12} /> Copied</>
-                                        : <><Copy size={12} /> Copy</>
-                                    }
-                                </button>
+                                <div className="mt-2.5 flex items-center gap-3">
+                                    <button
+                                        onClick={() => onCopyMessage(msg, index)}
+                                        title="Copy response"
+                                        className="inline-flex items-center gap-1.5 text-[10px] text-[#6b7280] hover:text-[#9ca3af] transition-colors"
+                                    >
+                                        {copiedMessageIndex === index ? (
+                                            <>
+                                                <Check size={12} className="text-[#10b981]" />
+                                                <span className="text-[#10b981]">Copied</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Copy size={12} />
+                                                <span>Copy</span>
+                                            </>
+                                        )}
+                                    </button>
+
+                                    {!isGenerating && (
+                                        <button
+                                            onClick={() => onRegenerateMessage(msg, index)}
+                                            title="Regenerate response"
+                                            className="inline-flex items-center gap-1.5 text-[10px] text-[#6b7280] hover:text-[#6366f1] transition-colors group/regen"
+                                        >
+                                            <RotateCw size={12} className="group-hover/regen:rotate-180 transition-transform duration-300" />
+                                            <span>Regenerate</span>
+                                        </button>
+                                    )}
+                                </div>
                             )}
                         </div>
                     </div>

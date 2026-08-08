@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
 import { Sidebar } from './Sidebar';
@@ -8,8 +8,8 @@ import { Message } from '@/types';
 
 export const ChatContainer: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [isLoadingChat, setIsLoadingChat] = useState(false);
+    const [isGenerating, setIsGenerating] = useState<boolean>(false);
+    const [isLoadingChat, setIsLoadingChat] = useState<boolean>(false);
     const [selectedModel, setSelectedModel] = useState<string>('');
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
@@ -25,6 +25,29 @@ export const ChatContainer: React.FC = () => {
         };
     }, []);
 
+    const fetchSelectedChat = useCallback(async (chatId: string) => {
+        try {
+            const res = await fetch(`/api/chats/${chatId}`);
+            if (res.ok) {
+                const data = await res.json();
+                const formattedMessages = (data.messages || []).map((m: any) => ({
+                    id: m.id,
+                    role: (m.role as string).toLowerCase() as Message['role'],
+                    content: m.content,
+                    createdAt: m.createdAt ? new Date(m.createdAt) : undefined,
+                }));
+                setMessages(formattedMessages);
+                if (data.modelId) {
+                    setSelectedModel(data.modelId);
+                }
+            } else {
+                console.error("Failed to load chat:", res.status);
+            }
+        } catch (err) {
+            console.error("Failed to load chat", err);
+        }
+    }, []);
+
     // Restore persisted message history whenever the active chat changes
     useEffect(() => {
         if (!activeChatId) {
@@ -33,39 +56,13 @@ export const ChatContainer: React.FC = () => {
             return;
         }
 
-        // Clear stale messages immediately so the old chat never flashes
         setMessages([]);
         setIsLoadingChat(true);
 
-        const fetchSelectedChat = async () => {
-            try {
-                const res = await fetch(`/api/chats/${activeChatId}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    // Normalise role casing from DB (stored as 'USER' / 'ASSISTANT')
-                    const formattedMessages = (data.messages || []).map((m: any) => ({
-                        id: m.id,
-                        role: (m.role as string).toLowerCase() as Message['role'],
-                        content: m.content,
-                        createdAt: m.createdAt ? new Date(m.createdAt) : undefined,
-                    }));
-                    setMessages(formattedMessages);
-                    // Restore the model that was used in this chat
-                    if (data.modelId) {
-                        setSelectedModel(data.modelId);
-                    }
-                } else {
-                    console.error("Failed to load chat:", res.status);
-                }
-            } catch (err) {
-                console.error("Failed to load chat", err);
-            } finally {
-                setIsLoadingChat(false);
-            }
-        };
-
-        fetchSelectedChat();
-    }, [activeChatId]);
+        fetchSelectedChat(activeChatId).finally(() => {
+            setIsLoadingChat(false);
+        });
+    }, [activeChatId, fetchSelectedChat]);
 
     const handleNewChat = () => {
         setActiveChatId(null);
@@ -80,7 +77,6 @@ export const ChatContainer: React.FC = () => {
 
         let currentChatId = activeChatId;
 
-        // create new chat if this is the first message
         if (!currentChatId) {
             try {
                 const res = await fetch('/api/chats', {
@@ -121,7 +117,6 @@ export const ChatContainer: React.FC = () => {
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             if (!response.body) throw new Error('No response body stream available');
 
-            // Add the assistant placeholder only once we have a live stream
             setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
 
             const reader = response.body.getReader();
@@ -153,6 +148,117 @@ export const ChatContainer: React.FC = () => {
             });
         } finally {
             setIsGenerating(false);
+            if (currentChatId) {
+                await fetchSelectedChat(currentChatId);
+            }
+        }
+    };
+
+    const handleEditMessage = async (message: Message, index: number, newContent: string) => {
+        if (!selectedModel || !activeChatId || isGenerating) return;
+
+        setMessages((prev) => {
+            const truncated = prev.slice(0, index + 1);
+            truncated[index] = { ...truncated[index], content: newContent };
+            return truncated;
+        });
+
+        setIsGenerating(true);
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chatId: activeChatId,
+                    model: selectedModel,
+                    action: 'edit',
+                    messageId: message.id,
+                    prompt: newContent,
+                }),
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.body) throw new Error('No response body stream available');
+
+            setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                setMessages((prev) => {
+                    const updated = [...prev];
+                    const lastIndex = updated.length - 1;
+                    updated[lastIndex] = {
+                        ...updated[lastIndex],
+                        content: updated[lastIndex].content + chunk
+                    };
+                    return updated;
+                });
+            }
+        } catch (error) {
+            console.error('Error in edit stream:', error);
+        } finally {
+            setIsGenerating(false);
+            if (activeChatId) {
+                await fetchSelectedChat(activeChatId);
+            }
+        }
+    };
+
+    const handleRegenerateMessage = async (message: Message, index: number) => {
+        if (!selectedModel || !activeChatId || isGenerating) return;
+
+        setMessages((prev) => prev.slice(0, index));
+        setIsGenerating(true);
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chatId: activeChatId,
+                    model: selectedModel,
+                    action: 'regenerate',
+                    messageId: message.id,
+                }),
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.body) throw new Error('No response body stream available');
+
+            setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                setMessages((prev) => {
+                    const updated = [...prev];
+                    const lastIndex = updated.length - 1;
+                    updated[lastIndex] = {
+                        ...updated[lastIndex],
+                        content: updated[lastIndex].content + chunk
+                    };
+                    return updated;
+                });
+            }
+        } catch (error) {
+            console.error('Error in regenerate stream:', error);
+        } finally {
+            setIsGenerating(false);
+            if (activeChatId) {
+                await fetchSelectedChat(activeChatId);
+            }
         }
     };
 
@@ -185,26 +291,24 @@ export const ChatContainer: React.FC = () => {
                 onNewChat={handleNewChat}
             />
 
-            {/* Main chat area */}
             <div className="flex-1 flex flex-col h-full min-w-0 relative">
 
-                {/* Copy toast */}
                 <div className={`fixed right-5 top-5 z-50 px-4 py-2.5 rounded-xl text-xs font-medium bg-[#1f2327] border border-[#2e3238] text-[#a5b4fc] shadow-xl transition-all duration-200 ${showCopyToast ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}`}>
-                    ✓ Copied to clipboard
+                    Copied to clipboard
                 </div>
 
-                {/* Messages */}
                 <div className="flex-1 overflow-y-auto px-6 py-8 md:px-12 lg:px-24 xl:px-32">
                     <MessageList
                         messages={messages}
                         copiedMessageIndex={copiedMessageIndex}
                         isGenerating={isGenerating}
                         onCopyMessage={handleCopyMessage}
+                        onEditMessage={handleEditMessage}
+                        onRegenerateMessage={handleRegenerateMessage}
                         selectedModel={selectedModel}
                     />
                 </div>
 
-                {/* Input area */}
                 <div className="px-6 pb-4 md:px-12 lg:px-24 xl:px-32 shrink-0">
                     <MessageInput
                         onSendMessage={handleSendMessage}

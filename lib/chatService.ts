@@ -71,6 +71,45 @@ export class ChatService {
         return message;
     }
 
+    static async getMessageById(id: string) {
+        return prisma.message.findUnique({
+            where: {
+                id
+            }
+        });
+    }
+
+    static async updateMessage(id: string, content: string) {
+        if (!content?.trim()) {
+            throw new Error("Message content cannot be empty");
+        }
+        return prisma.message.update({
+            where: { id },
+            data: { 
+                content: content.trim() 
+            }
+        });
+    }
+
+    static async deleteMessagesAfter(chatId: string, createdAt: Date) {
+        return prisma.message.deleteMany({
+            where: {
+                chatId,
+                createdAt: {
+                    gt: createdAt
+                }
+            }
+        });
+    }
+
+    static async deleteMessage(id: string) {
+        return prisma.message.delete({
+            where: { 
+                id 
+            }
+        });
+    }
+
     static async deleteChat(id: string) {
         return prisma.chat.delete({
             where: { id },

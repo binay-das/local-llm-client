@@ -1,6 +1,7 @@
 import { prisma } from "./prisma";
 import { Role } from "@prisma/client";
 
+
 export class ChatService {
     static async createChat(title: string, modelId?: string, modelName?: string) {
         return prisma.chat.create({
@@ -31,16 +32,13 @@ export class ChatService {
             include: {
                 messages: {
                     orderBy: { createdAt: "asc" },
-                    include: {
-                        context: true,
-                    }
                 },
             },
         });
     }
 
     static async addMessage(chatId: string, role: string, content: string) {
-        let prismaRole = Role.USER;
+        let prismaRole: Role = Role.USER;
         if (role === "assistant") prismaRole = Role.ASSISTANT;
         if (role === "system") prismaRole = Role.SYSTEM;
 

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { ChatService } from "@/lib/chatService";
-import { VectorService } from "@/lib/vectorService";
 import { OllamaService } from "@/lib/ollama";
 
 export async function POST(req: Request) {
@@ -11,28 +10,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
-        const userMsg = await ChatService.addMessage(chatId, "user", prompt);
-        
-        // generate and save embedding in background
-        OllamaService.getEmbeddings(model, prompt).then((embedding) => {
-           VectorService.saveContextEmbedding(userMsg.id, prompt, embedding).catch(console.error);
-        }).catch(console.error);
+        await ChatService.addMessage(chatId, "user", prompt);
 
-
-        let contextText = "";
-        try {
-            const currentEmbedding = await OllamaService.getEmbeddings(model, prompt);
-            const similarContexts = await VectorService.findSimilarContext(currentEmbedding);
-            if (similarContexts.length > 0) {
-                contextText = similarContexts.map((c) => c.content).join("\n---\n");
-            }
-        } catch (error) {
-            console.error("Context fetch error:", error);
-        }
-
-        // build prompt with context if it exists
-        const systemPrompt = "You are a helpful local LLM. Use the following context if it is useful to answer the latest question.\n\nContext:\n" + contextText;
-        const finalMessages = [{ role: "system", content: systemPrompt }, ...messages, { role: "user", content: prompt }];
+        const finalMessages = [...messages, { role: "user", content: prompt }];
 
         const stream = new ReadableStream({
             async start(controller) {
@@ -43,10 +23,8 @@ export async function POST(req: Request) {
                         fullContent += chunk;
                         controller.enqueue(new TextEncoder().encode(chunk));
                     }
-                    
-                    // Save Assistant Message when completely done
-                    await ChatService.addMessage(chatId, "assistant", fullContent);
 
+                    await ChatService.addMessage(chatId, "assistant", fullContent);
                 } catch (err) {
                     controller.error(err);
                 } finally {

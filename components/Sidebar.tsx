@@ -37,7 +37,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         const fetchModels = async () => {
             try {
                 const res = await fetch('/api/models');
-                if (!res.ok) return;
+                if (!res.ok) {
+                    return;
+                }
                 const data = await res.json();
                 const arr: Model[] = Array.isArray(data) ? data : [];
                 setModels(arr);
@@ -46,12 +48,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     if (!selectedModel || !exists) onSelectModel(arr[0].name);
                 }
 
-            } catch (e) { 
-                console.error(e); 
+            } catch (e) {
+                console.error(e);
             }
         };
         fetchModels();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleDeleteChat = async (e: React.MouseEvent, id: string) => {
@@ -59,15 +61,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
         try {
             await fetch(`/api/chats/${id}`, { method: 'DELETE' });
             if (activeChatId === id) onNewChat();
-            else fetchChats();
+            await fetchChats();
         } catch (e) { console.error(e); }
     };
 
     return (
-        <div className="hidden md:flex flex-col w-[210px] shrink-0 bg-[#111315] border-r border-[#2a2d31] text-white h-full">
+        <div className="hidden md:flex flex-col w-52.5 shrink-0 bg-[#111315] border-r border-[#2a2d31] text-white h-full">
             <div className="px-5 pt-6 pb-4">
                 <div className="flex items-center gap-3 mb-1">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-linear-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shrink-0">
                         <Bot size={16} className="text-white" />
                     </div>
                     <div>
@@ -88,11 +90,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                     key={m.name}
                                     onClick={() => onSelectModel(m.name)}
                                     title={m.name}
-                                    className={`text-[10px] font-semibold px-2.5 py-1 rounded transition-all duration-150 ${
-                                        isActive
-                                            ? 'text-white border-b-2 border-white bg-transparent'
-                                            : 'text-[#6b7280] hover:text-[#9ca3af] border-b-2 border-transparent'
-                                    }`}
+                                    className={`text-[10px] font-semibold px-2.5 py-1 rounded transition-all duration-150 ${isActive
+                                        ? 'text-white border-b-2 border-white bg-transparent'
+                                        : 'text-[#6b7280] hover:text-[#9ca3af] border-b-2 border-transparent'
+                                        }`}
                                 >
                                     {shortName}
                                 </button>
@@ -119,11 +120,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <div
                             key={chat.id}
                             onClick={() => onSelectChat(chat.id)}
-                            className={`group flex items-center justify-between gap-2 px-2.5 py-2 rounded-md cursor-pointer transition-all duration-100 ${
-                                activeChatId === chat.id
-                                    ? 'bg-[#1f2327] text-white'
-                                    : 'text-[#9ca3af] hover:bg-[#1a1d21] hover:text-[#d1d5db]'
-                            }`}
+                            className={`group flex items-center justify-between gap-2 px-2.5 py-2 rounded-md cursor-pointer transition-all duration-100 ${activeChatId === chat.id
+                                ? 'bg-[#1f2327] text-white'
+                                : 'text-[#9ca3af] hover:bg-[#1a1d21] hover:text-[#d1d5db]'
+                                }`}
                         >
                             <div className="flex items-center gap-2 overflow-hidden">
                                 <Clock size={13} className="shrink-0 text-[#4b5563]" />

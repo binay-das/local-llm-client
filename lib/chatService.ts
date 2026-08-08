@@ -1,11 +1,12 @@
 import { prisma } from "./prisma";
 import { Role } from "@prisma/client";
 
+
 export class ChatService {
     static async createChat(title: string, modelId?: string, modelName?: string) {
         return prisma.chat.create({
             data: {
-                title,
+                title: title?.trim() || "New Chat",
                 modelId,
                 modelName,
             },
@@ -16,12 +17,10 @@ export class ChatService {
         return prisma.chat.findMany({
             orderBy: { updatedAt: "desc" },
             include: {
-                messages: {
-                    select: {
-                        id: true,
-                    }
-                }
-            }
+                _count: {
+                    select: { messages: true },
+                },
+            },
         });
     }
 
@@ -31,16 +30,28 @@ export class ChatService {
             include: {
                 messages: {
                     orderBy: { createdAt: "asc" },
-                    include: {
-                        context: true,
-                    }
                 },
             },
         });
     }
 
+    static async getMessagesByChatId(chatId: string) {
+        return prisma.message.findMany({
+            where: {
+                chatId
+            },
+            orderBy: {
+                createdAt: "asc"
+            }
+        });
+    }
+
     static async addMessage(chatId: string, role: string, content: string) {
-        let prismaRole = Role.USER;
+        if (!content?.trim()) {
+            throw new Error("Message content cannot be empty");
+        }
+
+        let prismaRole: Role = Role.USER;
         if (role === "assistant") prismaRole = Role.ASSISTANT;
         if (role === "system") prismaRole = Role.SYSTEM;
 
@@ -48,11 +59,10 @@ export class ChatService {
             data: {
                 chatId,
                 role: prismaRole,
-                content,
+                content: content.trim(),
             },
         });
 
-        // Update chat's updatedAt timestamp
         await prisma.chat.update({
             where: { id: chatId },
             data: { updatedAt: new Date() },

@@ -1,52 +1,35 @@
 import { NextResponse } from "next/server";
 import { ChatService } from "@/lib/chatService";
-import { VectorService } from "@/lib/vectorService";
 import { OllamaService } from "@/lib/ollama";
 
 export async function POST(req: Request) {
     try {
-        const { chatId, model, messages, prompt } = await req.json();
+        const { chatId, model, prompt } = await req.json();
 
-        if (!chatId || !model || !messages || !prompt) {
+        if (!chatId || !model || !prompt) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
-        const userMsg = await ChatService.addMessage(chatId, "user", prompt);
-        
-        // generate and save embedding in background
-        OllamaService.getEmbeddings(model, prompt).then((embedding) => {
-           VectorService.saveContextEmbedding(userMsg.id, prompt, embedding).catch(console.error);
-        }).catch(console.error);
+        await ChatService.addMessage(chatId, "user", prompt);
 
+        const persistedMessages = await ChatService.getMessagesByChatId(chatId);
 
-        let contextText = "";
-        try {
-            const currentEmbedding = await OllamaService.getEmbeddings(model, prompt);
-            const similarContexts = await VectorService.findSimilarContext(currentEmbedding);
-            if (similarContexts.length > 0) {
-                contextText = similarContexts.map((c) => c.content).join("\n---\n");
-            }
-        } catch (error) {
-            console.error("Context fetch error:", error);
-        }
-
-        // build prompt with context if it exists
-        const systemPrompt = "You are a helpful local LLM. Use the following context if it is useful to answer the latest question.\n\nContext:\n" + contextText;
-        const finalMessages = [{ role: "system", content: systemPrompt }, ...messages, { role: "user", content: prompt }];
+        const ollamaMessages = persistedMessages.map((m) => ({
+            role: m.role.toLowerCase() as "user" | "assistant" | "system",
+            content: m.content,
+        }));
 
         const stream = new ReadableStream({
             async start(controller) {
                 let fullContent = "";
                 try {
-                    const asyncIterable = OllamaService.chatStream(model, finalMessages);
+                    const asyncIterable = OllamaService.chatStream(model, ollamaMessages);
                     for await (const chunk of asyncIterable) {
                         fullContent += chunk;
                         controller.enqueue(new TextEncoder().encode(chunk));
                     }
-                    
-                    // Save Assistant Message when completely done
-                    await ChatService.addMessage(chatId, "assistant", fullContent);
 
+                    await ChatService.addMessage(chatId, "assistant", fullContent);
                 } catch (err) {
                     controller.error(err);
                 } finally {

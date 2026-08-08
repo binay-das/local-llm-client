@@ -9,6 +9,7 @@ import { Message } from '@/types';
 export const ChatContainer: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isLoadingChat, setIsLoadingChat] = useState(false);
     const [selectedModel, setSelectedModel] = useState<string>('');
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
@@ -24,29 +25,42 @@ export const ChatContainer: React.FC = () => {
         };
     }, []);
 
-    // fetch messages when activeChatId changes
+    // Restore persisted message history whenever the active chat changes
     useEffect(() => {
         if (!activeChatId) {
             setMessages([]);
+            setIsLoadingChat(false);
             return;
         }
+
+        // Clear stale messages immediately so the old chat never flashes
+        setMessages([]);
+        setIsLoadingChat(true);
 
         const fetchSelectedChat = async () => {
             try {
                 const res = await fetch(`/api/chats/${activeChatId}`);
                 if (res.ok) {
                     const data = await res.json();
+                    // Normalise role casing from DB (stored as 'USER' / 'ASSISTANT')
                     const formattedMessages = (data.messages || []).map((m: any) => ({
-                        ...m,
-                        role: m.role ? m.role.toLowerCase() : 'user'
+                        id: m.id,
+                        role: (m.role as string).toLowerCase() as Message['role'],
+                        content: m.content,
+                        createdAt: m.createdAt ? new Date(m.createdAt) : undefined,
                     }));
                     setMessages(formattedMessages);
+                    // Restore the model that was used in this chat
                     if (data.modelId) {
                         setSelectedModel(data.modelId);
                     }
+                } else {
+                    console.error("Failed to load chat:", res.status);
                 }
             } catch (err) {
                 console.error("Failed to load chat", err);
+            } finally {
+                setIsLoadingChat(false);
             }
         };
 
@@ -90,11 +104,8 @@ export const ChatContainer: React.FC = () => {
         }
 
         const userMessage: Message = { role: 'user', content };
-        const initialMessages = [...messages, userMessage];
-        setMessages(initialMessages);
+        setMessages((prev) => [...prev, userMessage]);
         setIsGenerating(true);
-
-        setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
 
         try {
             const response = await fetch('/api/chat', {
@@ -103,13 +114,15 @@ export const ChatContainer: React.FC = () => {
                 body: JSON.stringify({
                     chatId: currentChatId,
                     model: selectedModel,
-                    messages: messages.map(m => ({ role: m.role.toLowerCase(), content: m.content })),
                     prompt: content,
                 }),
             });
 
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             if (!response.body) throw new Error('No response body stream available');
+
+            // Add the assistant placeholder only once we have a live stream
+            setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder("utf-8");
@@ -132,13 +145,11 @@ export const ChatContainer: React.FC = () => {
         } catch (error) {
             console.error('Error fetching stream:', error);
             setMessages((prev) => {
-                const updated = [...prev];
-                const lastIndex = updated.length - 1;
-                updated[lastIndex] = {
-                    ...updated[lastIndex],
-                    content: 'Error: Failed to connect or generate response.'
-                };
-                return updated;
+                const last = prev[prev.length - 1];
+                if (last?.role === 'assistant' && last.content === '') {
+                    return prev.slice(0, -1);
+                }
+                return prev;
             });
         } finally {
             setIsGenerating(false);
@@ -197,8 +208,14 @@ export const ChatContainer: React.FC = () => {
                 <div className="px-6 pb-4 md:px-12 lg:px-24 xl:px-32 shrink-0">
                     <MessageInput
                         onSendMessage={handleSendMessage}
-                        disabled={isGenerating || !selectedModel}
-                        placeholder={modelShortName ? `Message ${modelShortName}...` : 'Select a model to start...'}
+                        disabled={isGenerating || isLoadingChat || !selectedModel}
+                        placeholder={
+                            isLoadingChat
+                                ? 'Loading conversation...'
+                                : modelShortName
+                                    ? `Message ${modelShortName}...`
+                                    : 'Select a model to start...'
+                        }
                     />
                     <p className="text-center text-[10px] text-[#374151] mt-2.5">
                         Local Inference via Ollama. Responses are generated on your device.

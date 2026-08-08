@@ -16,20 +16,20 @@ export class OllamaService {
         }
     }
 
-    static async getEmbeddings(modelName: string, prompt: string): Promise<number[]> {
-        const response = await fetch(`${OLLAMA_BASE_URL}/api/embeddings`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ model: modelName, prompt }),
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Failed to generate embeddings: ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        return data.embedding;
-    }
+    // static async getEmbeddings(modelName: string, prompt: string): Promise<number[]> {
+    //     const response = await fetch(`${OLLAMA_BASE_URL}/api/embeddings`, {
+    //         method: "POST",
+    //         headers: { "Content-Type": "application/json" },
+    //         body: JSON.stringify({ model: modelName, prompt }),
+    //     });
+
+    //     if (!response.ok) {
+    //         throw new Error(`Failed to generate embeddings: ${response.statusText}`);
+    //     }
+
+    //     const data = await response.json();
+    //     return data.embedding;
+    // }
 
     static async *chatStream(modelName: string, messages: Message[]) {
         const response = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
@@ -61,7 +61,7 @@ export class OllamaService {
 
             buffer += decoder.decode(value, { stream: true });
             const lines = buffer.split("\n");
-            
+
             buffer = lines.pop() || "";
 
             for (const line of lines) {

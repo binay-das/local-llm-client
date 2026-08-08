@@ -4,21 +4,26 @@ import { OllamaService } from "@/lib/ollama";
 
 export async function POST(req: Request) {
     try {
-        const { chatId, model, messages, prompt } = await req.json();
+        const { chatId, model, prompt } = await req.json();
 
-        if (!chatId || !model || !messages || !prompt) {
+        if (!chatId || !model || !prompt) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
         await ChatService.addMessage(chatId, "user", prompt);
 
-        const finalMessages = [...messages, { role: "user", content: prompt }];
+        const persistedMessages = await ChatService.getMessagesByChatId(chatId);
+
+        const ollamaMessages = persistedMessages.map((m) => ({
+            role: m.role.toLowerCase() as "user" | "assistant" | "system",
+            content: m.content,
+        }));
 
         const stream = new ReadableStream({
             async start(controller) {
                 let fullContent = "";
                 try {
-                    const asyncIterable = OllamaService.chatStream(model, finalMessages);
+                    const asyncIterable = OllamaService.chatStream(model, ollamaMessages);
                     for await (const chunk of asyncIterable) {
                         fullContent += chunk;
                         controller.enqueue(new TextEncoder().encode(chunk));

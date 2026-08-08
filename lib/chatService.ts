@@ -37,6 +37,17 @@ export class ChatService {
         });
     }
 
+    static async getMessagesByChatId(chatId: string) {
+        return prisma.message.findMany({
+            where: {
+                chatId
+            },
+            orderBy: {
+                createdAt: "asc"
+            }
+        });
+    }
+
     static async addMessage(chatId: string, role: string, content: string) {
         let prismaRole: Role = Role.USER;
         if (role === "assistant") prismaRole = Role.ASSISTANT;

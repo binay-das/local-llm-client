@@ -22,28 +22,14 @@ model Message {
   chatId String
   chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
 
-  role    String @default("USER")
-  content String
-
-  createdAt DateTime @default(now())
-
-  context Context?
-}
-
-model Context {
-  id        String   @id @default(cuid())
-  messageId String?  @unique
-  message   Message? @relation(fields: [messageId], references: [id])
-
+  role    Role   @default(USER)
   content String
 
   createdAt DateTime @default(now())
 }
 
-model LocalModel {
-  id         String   @id @default(cuid())
-  name       String   @unique
-  size       BigInt?
-  digest     String?
-  modifiedAt DateTime @default(now())
+enum Role {
+  USER
+  ASSISTANT
+  SYSTEM
 }

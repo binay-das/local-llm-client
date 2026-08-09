@@ -61,10 +61,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             <div className="px-3 py-1">
                 <button
-                    onClick={() => {
-                        onNewChat();
-                        if (onClose) onClose();
-                    }}
+                    onClick={onNewChat}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-200/60 dark:bg-[#1c1f24] hover:bg-slate-200 dark:hover:bg-[#25282e] border border-slate-300/40 dark:border-[#2a2d34] text-xs text-slate-700 dark:text-slate-200 font-medium transition-all duration-150 shadow-2xs"
                 >
                     <SquarePen size={15} className="text-slate-600 dark:text-slate-300" />
@@ -72,7 +69,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
             </div>
 
-            {/* Chats List */}
             <div className="flex-1 overflow-y-auto px-3 py-3 min-h-0 space-y-1">
                 {chats.length > 0 && (
                     <p className="text-[10px] uppercase tracking-wider text-slate-400 dark:text-[#5d6470] font-semibold px-2 mb-1.5">
@@ -82,10 +78,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {chats.map(chat => (
                     <div
                         key={chat.id}
-                        onClick={() => {
-                            onSelectChat(chat.id);
-                            if (onClose) onClose();
-                        }}
+                        onClick={() => onSelectChat(chat.id)}
                         className={`group flex items-center justify-between gap-2 px-2.5 py-2 rounded-xl cursor-pointer transition-all duration-100 ${activeChatId === chat.id
                             ? 'bg-slate-200/80 dark:bg-[#1f2227] text-slate-900 dark:text-white font-medium'
                             : 'text-slate-600 dark:text-[#9ca3af] hover:bg-slate-200/40 dark:hover:bg-[#181a1e] hover:text-slate-900 dark:hover:text-slate-200'
@@ -103,7 +96,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 ))}
             </div>
 
-            {/* Bottom Footer with Settings button */}
             <div className="p-3 border-t border-slate-200/80 dark:border-[#1e2125]">
                 <button
                     onClick={() => setIsSettingsOpen(true)}
@@ -114,7 +106,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
             </div>
 
-            {/* Settings Modal */}
             <SettingsModal
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
@@ -124,12 +115,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
     return (
         <>
-            {/* Desktop Sidebar */}
             <div className={`hidden md:flex flex-col w-60 shrink-0 h-full transition-all duration-200 ${isOpen ? '' : '-ml-60'}`}>
                 {sidebarContent}
             </div>
 
-            {/* Mobile Drawer Overlay */}
             {isOpen && (
                 <div className="fixed inset-0 z-50 md:hidden flex">
                     <div

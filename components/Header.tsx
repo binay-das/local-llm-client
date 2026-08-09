@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import { ThemeToggle } from './ThemeToggle';
-import { Bot, PanelLeft } from 'lucide-react';
+import { Sparkles, PanelLeft } from 'lucide-react';
 
 interface HeaderProps {
     onToggleSidebar?: () => void;
@@ -22,15 +22,15 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, selectedModel }
                     </button>
                 )}
                 <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-xs">
-                        <Bot size={16} />
+                    <div className="w-7 h-7 rounded-lg bg-slate-200 dark:bg-[#22252a] border border-slate-300 dark:border-[#2d3138] flex items-center justify-center text-slate-800 dark:text-slate-200">
+                        <Sparkles size={16} />
                     </div>
                     <div>
                         <h1 className="text-sm font-semibold text-slate-900 dark:text-white leading-none">
                             Local LLM Client
                         </h1>
                         {selectedModel && (
-                            <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium leading-tight mt-0.5">
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-tight mt-0.5">
                                 {selectedModel}
                             </p>
                         )}

@@ -50,7 +50,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({ selectedModel, onS
             <select
                 value={selectedModel}
                 onChange={(e) => onSelectModel(e.target.value)}
-                className="w-full rounded-xl px-4 py-2.5 bg-slate-50 dark:bg-[#1b1e24] text-slate-900 dark:text-[#eee8e0] border border-slate-200 dark:border-[#404247] focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                className="w-full rounded-xl px-4 py-2.5 bg-slate-50 dark:bg-[#1b1e24] text-slate-900 dark:text-[#eee8e0] border border-slate-200 dark:border-[#404247] focus:outline-none focus:ring-2 focus:ring-slate-400/40"
             >
                 <option value="" disabled>Choose a model</option>
                 {models.map((model) => (

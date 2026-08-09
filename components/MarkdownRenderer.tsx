@@ -51,7 +51,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
                         const { inline, className, children } = props;
                         if (inline) {
                             return (
-                                <code className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#1f2327] border border-slate-200 dark:border-[#2e3238] text-indigo-600 dark:text-[#a5b4fc] text-[0.88em] font-mono">
+                                <code className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#1f2327] border border-slate-200 dark:border-[#2e3238] text-slate-900 dark:text-slate-100 text-[0.88em] font-mono font-medium">
                                     {children}
                                 </code>
                             );
@@ -61,14 +61,14 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
                     a({ href, children, ...props }) {
                         return (
                             <a href={href} target="_blank" rel="noreferrer"
-                                className="text-indigo-600 dark:text-[#818cf8] underline underline-offset-2 hover:text-indigo-800 dark:hover:text-[#a5b4fc]" {...props}>
+                                className="text-slate-900 dark:text-slate-100 underline underline-offset-2 hover:text-slate-600 dark:hover:text-slate-300 font-medium" {...props}>
                                 {children}
                             </a>
                         );
                     },
                     blockquote({ children, ...props }) {
                         return (
-                            <blockquote className="pl-4 border-l-2 border-indigo-500 text-slate-600 dark:text-[#9ca3af] my-3 italic" {...props}>
+                            <blockquote className="pl-4 border-l-2 border-slate-400 dark:border-slate-600 text-slate-600 dark:text-[#9ca3af] my-3 italic" {...props}>
                                 {children}
                             </blockquote>
                         );

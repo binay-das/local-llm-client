@@ -20,7 +20,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', showLa
     return (
         <button
             onClick={toggleTheme}
-            className={`group relative flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-200 cursor-pointer text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${
+            className={`group relative flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-200 cursor-pointer text-xs font-medium focus:outline-none focus:ring-2 focus:ring-slate-400/40 ${
                 isDark
                     ? 'bg-[#1a1d21] border-[#2e3238] text-[#e5e7eb] hover:bg-[#22262c] hover:border-[#3a3f47]'
                     : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-xs'
@@ -37,7 +37,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', showLa
                 />
                 <Moon
                     size={15}
-                    className={`absolute transition-all duration-300 transform text-indigo-400 ${
+                    className={`absolute transition-all duration-300 transform text-slate-300 ${
                         isDark ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'
                     }`}
                 />

@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { MessageList } from './MessageList';
 import { MessageInput } from './MessageInput';
 import { Sidebar } from './Sidebar';
+import { Header } from './Header';
 import { Message } from '@/types';
 
 export const ChatContainer: React.FC = () => {
@@ -12,6 +13,7 @@ export const ChatContainer: React.FC = () => {
     const [isLoadingChat, setIsLoadingChat] = useState<boolean>(false);
     const [selectedModel, setSelectedModel] = useState<string>('');
     const [activeChatId, setActiveChatId] = useState<string | null>(null);
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
 
     const [copiedMessageIndex, setCopiedMessageIndex] = useState<number | null>(null);
     const [showCopyToast, setShowCopyToast] = useState(false);
@@ -20,8 +22,12 @@ export const ChatContainer: React.FC = () => {
 
     useEffect(() => {
         return () => {
-            if (copyResetTimeoutRef.current) window.clearTimeout(copyResetTimeoutRef.current);
-            if (toastTimeoutRef.current) window.clearTimeout(toastTimeoutRef.current);
+            if (copyResetTimeoutRef.current) {
+                window.clearTimeout(copyResetTimeoutRef.current);
+            }
+            if (toastTimeoutRef.current) {
+                window.clearTimeout(toastTimeoutRef.current);
+            }
         };
     }, []);
 
@@ -282,22 +288,28 @@ export const ChatContainer: React.FC = () => {
     const modelShortName = selectedModel ? selectedModel.split(':')[0] : '';
 
     return (
-        <div className="flex h-screen w-full bg-[#0d0f11]">
+        <div className="flex h-screen w-full bg-slate-50 dark:bg-[#0d0f11] text-slate-900 dark:text-white transition-colors duration-200">
             <Sidebar
                 selectedModel={selectedModel}
                 onSelectModel={setSelectedModel}
                 activeChatId={activeChatId}
                 onSelectChat={setActiveChatId}
                 onNewChat={handleNewChat}
+                isOpen={isMobileSidebarOpen}
+                onClose={() => setIsMobileSidebarOpen(false)}
             />
 
             <div className="flex-1 flex flex-col h-full min-w-0 relative">
+                <Header
+                    onToggleSidebar={() => setIsMobileSidebarOpen(true)}
+                    selectedModel={selectedModel}
+                />
 
-                <div className={`fixed right-5 top-5 z-50 px-4 py-2.5 rounded-xl text-xs font-medium bg-[#1f2327] border border-[#2e3238] text-[#a5b4fc] shadow-xl transition-all duration-200 ${showCopyToast ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}`}>
+                <div className={`fixed right-5 top-16 z-50 px-4 py-2.5 rounded-xl text-xs font-medium bg-slate-800 dark:bg-[#1f2327] border border-slate-700 dark:border-[#2e3238] text-indigo-300 dark:text-[#a5b4fc] shadow-xl transition-all duration-200 ${showCopyToast ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}`}>
                     Copied to clipboard
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-6 py-8 md:px-12 lg:px-24 xl:px-32">
+                <div className="flex-1 overflow-y-auto px-4 py-6 md:px-12 lg:px-24 xl:px-32">
                     <MessageList
                         messages={messages}
                         copiedMessageIndex={copiedMessageIndex}
@@ -309,7 +321,7 @@ export const ChatContainer: React.FC = () => {
                     />
                 </div>
 
-                <div className="px-6 pb-4 md:px-12 lg:px-24 xl:px-32 shrink-0">
+                <div className="px-4 pb-4 md:px-12 lg:px-24 xl:px-32 shrink-0">
                     <MessageInput
                         onSendMessage={handleSendMessage}
                         disabled={isGenerating || isLoadingChat || !selectedModel}
@@ -321,7 +333,7 @@ export const ChatContainer: React.FC = () => {
                                     : 'Select a model to start...'
                         }
                     />
-                    <p className="text-center text-[10px] text-[#374151] mt-2.5">
+                    <p className="text-center text-[10px] text-slate-400 dark:text-[#4b5563] mt-2.5">
                         Local Inference via Ollama. Responses are generated on your device.
                     </p>
                 </div>

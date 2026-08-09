@@ -22,21 +22,19 @@ function CodeBlock({ className, children }: { className?: string; children: Reac
     };
 
     return (
-        <div className="relative my-3 rounded-xl overflow-hidden border border-[#2e3238] bg-[#161b22]">
-            {/* Header bar */}
-            <div className="flex items-center justify-between px-4 py-2 bg-[#1c2128] border-b border-[#2e3238]">
-                <span className="text-[11px] text-[#6b7280] font-mono">
+        <div className="relative my-3 rounded-xl overflow-hidden border border-slate-700 dark:border-[#2e3238] bg-slate-900 dark:bg-[#161b22] text-slate-100 shadow-xs">
+            <div className="flex items-center justify-between px-4 py-2 bg-slate-800 dark:bg-[#1c2128] border-b border-slate-700 dark:border-[#2e3238]">
+                <span className="text-[11px] text-slate-400 dark:text-[#6b7280] font-mono">
                     {lang || 'code'}
                 </span>
                 <button
                     onClick={handleCopy}
-                    className="flex items-center gap-1.5 text-[11px] text-[#6b7280] hover:text-[#d1d5db] transition-colors"
+                    className="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-[#6b7280] hover:text-slate-200 dark:hover:text-[#d1d5db] transition-colors"
                 >
-                    {copied ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy</>}
+                    {copied ? <><Check size={12} className="text-emerald-400" /> Copied</> : <><Copy size={12} /> Copy</>}
                 </button>
             </div>
-            {/* Code */}
-            <pre className="overflow-x-auto p-4 text-sm text-[#e6edf3] font-mono leading-relaxed">
+            <pre className="overflow-x-auto p-4 text-sm text-slate-100 dark:text-[#e6edf3] font-mono leading-relaxed">
                 <code className={className}>{codeContent}</code>
             </pre>
         </div>
@@ -45,7 +43,7 @@ function CodeBlock({ className, children }: { className?: string; children: Reac
 
 export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
     return (
-        <div className="text-sm leading-[1.75] overflow-wrap-anywhere text-[#d1d5db]">
+        <div className="text-sm leading-[1.75] overflow-wrap-anywhere text-slate-800 dark:text-[#d1d5db]">
             <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
@@ -53,7 +51,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
                         const { inline, className, children } = props;
                         if (inline) {
                             return (
-                                <code className="px-1.5 py-0.5 rounded bg-[#1f2327] border border-[#2e3238] text-[#a5b4fc] text-[0.88em] font-mono">
+                                <code className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#1f2327] border border-slate-200 dark:border-[#2e3238] text-indigo-600 dark:text-[#a5b4fc] text-[0.88em] font-mono">
                                     {children}
                                 </code>
                             );
@@ -63,20 +61,20 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
                     a({ href, children, ...props }) {
                         return (
                             <a href={href} target="_blank" rel="noreferrer"
-                                className="text-[#818cf8] underline underline-offset-2 hover:text-[#a5b4fc]" {...props}>
+                                className="text-indigo-600 dark:text-[#818cf8] underline underline-offset-2 hover:text-indigo-800 dark:hover:text-[#a5b4fc]" {...props}>
                                 {children}
                             </a>
                         );
                     },
                     blockquote({ children, ...props }) {
                         return (
-                            <blockquote className="pl-4 border-l-2 border-[#6366f1] text-[#9ca3af] my-3" {...props}>
+                            <blockquote className="pl-4 border-l-2 border-indigo-500 text-slate-600 dark:text-[#9ca3af] my-3 italic" {...props}>
                                 {children}
                             </blockquote>
                         );
                     },
                     hr({ ...props }) {
-                        return <hr className="border-0 border-t border-[#2e3238] my-4" {...props} />;
+                        return <hr className="border-0 border-t border-slate-200 dark:border-[#2e3238] my-4" {...props} />;
                     },
                     p({ children, ...props }) {
                         return <p className="mb-3 mt-0 last:mb-0" {...props}>{children}</p>;
@@ -91,32 +89,32 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
                         return <li className="leading-relaxed" {...props}>{children}</li>;
                     },
                     h1({ children, ...props }) {
-                        return <h1 className="mt-4 mb-2 text-2xl font-bold text-white" {...props}>{children}</h1>;
+                        return <h1 className="mt-4 mb-2 text-2xl font-bold text-slate-900 dark:text-white" {...props}>{children}</h1>;
                     },
                     h2({ children, ...props }) {
-                        return <h2 className="mt-4 mb-2 text-xl font-bold text-white" {...props}>{children}</h2>;
+                        return <h2 className="mt-4 mb-2 text-xl font-bold text-slate-900 dark:text-white" {...props}>{children}</h2>;
                     },
                     h3({ children, ...props }) {
-                        return <h3 className="mt-3 mb-1.5 text-lg font-semibold text-white" {...props}>{children}</h3>;
+                        return <h3 className="mt-3 mb-1.5 text-lg font-semibold text-slate-900 dark:text-white" {...props}>{children}</h3>;
                     },
                     h4({ children, ...props }) {
-                        return <h4 className="mt-3 mb-1.5 font-semibold text-[#e5e7eb]" {...props}>{children}</h4>;
+                        return <h4 className="mt-3 mb-1.5 font-semibold text-slate-800 dark:text-[#e5e7eb]" {...props}>{children}</h4>;
                     },
                     strong({ children, ...props }) {
-                        return <strong className="font-semibold text-[#f9fafb]" {...props}>{children}</strong>;
+                        return <strong className="font-semibold text-slate-900 dark:text-[#f9fafb]" {...props}>{children}</strong>;
                     },
                     table({ children, ...props }) {
                         return (
                             <div className="overflow-x-auto my-3">
-                                <table className="w-full text-sm border-collapse border border-[#2e3238]" {...props}>{children}</table>
+                                <table className="w-full text-sm border-collapse border border-slate-200 dark:border-[#2e3238]" {...props}>{children}</table>
                             </div>
                         );
                     },
                     th({ children, ...props }) {
-                        return <th className="px-3 py-2 bg-[#1f2327] text-left font-semibold text-[#e5e7eb] border border-[#2e3238]" {...props}>{children}</th>;
+                        return <th className="px-3 py-2 bg-slate-100 dark:bg-[#1f2327] text-left font-semibold text-slate-900 dark:text-[#e5e7eb] border border-slate-200 dark:border-[#2e3238]" {...props}>{children}</th>;
                     },
                     td({ children, ...props }) {
-                        return <td className="px-3 py-2 text-[#d1d5db] border border-[#2e3238]" {...props}>{children}</td>;
+                        return <td className="px-3 py-2 text-slate-700 dark:text-[#d1d5db] border border-slate-200 dark:border-[#2e3238]" {...props}>{children}</td>;
                     },
                 }}
             >

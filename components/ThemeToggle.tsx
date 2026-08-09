@@ -1,39 +1,52 @@
 "use client";
 
 import { useTheme } from './ThemeProvider';
+import { Sun, Moon } from 'lucide-react';
 
-export const ThemeToggle = () => {
-    const { isDark, toggleTheme } = useTheme();
+interface ThemeToggleProps {
+    className?: string;
+    showLabel?: boolean;
+}
+
+export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', showLabel = false }) => {
+    const { isDark, toggleTheme, mounted } = useTheme();
+
+    if (!mounted) {
+        return (
+            <div className={`w-9 h-9 rounded-xl bg-slate-200/50 dark:bg-[#1a1d21] animate-pulse ${className}`} />
+        );
+    }
 
     return (
         <button
             onClick={toggleTheme}
-            className="relative z-50 h-11 w-20 rounded-full cursor-pointer overflow-hidden transition-all duration-300 border border-[#ddd6cc] dark:border-[#3f4146] bg-gradient-to-br from-white to-[#e8e3db] dark:from-[#23272d] dark:to-[#141619] shadow-lg dark:shadow-xl hover:-translate-y-0.5 hover:shadow-xl dark:hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            aria-label="Toggle theme"
-            aria-pressed={isDark}
+            className={`group relative flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-200 cursor-pointer text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${
+                isDark
+                    ? 'bg-[#1a1d21] border-[#2e3238] text-[#e5e7eb] hover:bg-[#22262c] hover:border-[#3a3f47]'
+                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-xs'
+            } ${className}`}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
         >
-            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-[#faf8f4] to-[#e9e5dc] dark:from-[#171a1f] dark:to-[#0c0e11]" aria-hidden="true" />
-            <span className="pointer-events-none absolute inset-0 flex items-center justify-between px-3 text-[#3d434b] dark:text-[#e3dfd7]" aria-hidden="true">
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="4" />
-                    <path strokeLinecap="round" d="M12 2.5v2.2M12 19.3v2.2M21.5 12h-2.2M4.7 12H2.5M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6M18.7 18.7l-1.6-1.6M6.9 6.9L5.3 5.3" />
-                </svg>
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" />
-                </svg>
-            </span>
-            <span className={`relative z-10 flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 bg-white dark:bg-[#2f2a26] border border-[#dbd3c5] dark:border-[#5b5248] shadow-md dark:shadow-lg ${isDark ? 'translate-x-9' : 'translate-x-0'}`}>
-                {isDark ? (
-                    <svg className="h-4.5 w-4.5 text-[#a58d6e]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" />
-                    </svg>
-                ) : (
-                    <svg className="h-4.5 w-4.5 text-[#3d434b]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="4" />
-                        <path strokeLinecap="round" d="M12 2.5v2.2M12 19.3v2.2M21.5 12h-2.2M4.7 12H2.5M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6M18.7 18.7l-1.6-1.6M6.9 6.9L5.3 5.3" />
-                    </svg>
-                )}
-            </span>
+            <div className="relative w-4 h-4 flex items-center justify-center">
+                <Sun
+                    size={15}
+                    className={`absolute transition-all duration-300 transform text-amber-500 ${
+                        isDark ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'
+                    }`}
+                />
+                <Moon
+                    size={15}
+                    className={`absolute transition-all duration-300 transform text-indigo-400 ${
+                        isDark ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'
+                    }`}
+                />
+            </div>
+            {showLabel && (
+                <span className="select-none">
+                    {isDark ? 'Dark' : 'Light'}
+                </span>
+            )}
         </button>
     );
 };

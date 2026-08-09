@@ -39,17 +39,15 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disab
     }, [input]);
 
     return (
-        <form onSubmit={handleSubmit} className="relative flex items-end gap-2 rounded-2xl bg-[#1a1d21] border border-[#2e3238] px-3 py-2.5 shadow-xl">
-            {/* Attachment */}
+        <form onSubmit={handleSubmit} className="relative flex items-end gap-2 rounded-2xl bg-white dark:bg-[#1a1d21] border border-slate-200 dark:border-[#2e3238] px-3 py-2.5 shadow-sm dark:shadow-xl transition-colors duration-200">
             <button
                 type="button"
-                className="shrink-0 p-1.5 text-[#4b5563] hover:text-[#9ca3af] transition-colors rounded-lg"
+                className="shrink-0 p-1.5 text-slate-400 dark:text-[#4b5563] hover:text-slate-600 dark:hover:text-[#9ca3af] transition-colors rounded-lg"
                 aria-label="Attach file"
             >
                 <Paperclip size={18} strokeWidth={1.8} />
             </button>
 
-            {/* Textarea */}
             <textarea
                 ref={textareaRef}
                 value={input}
@@ -58,13 +56,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disab
                 disabled={disabled}
                 placeholder={placeholder || 'Message...'}
                 rows={1}
-                className="flex-1 resize-none bg-transparent text-[#e5e7eb] placeholder:text-[#4b5563] text-sm leading-relaxed focus:outline-none disabled:opacity-40 min-h-[28px] max-h-[160px] py-1"
+                className="flex-1 resize-none bg-transparent text-slate-900 dark:text-[#e5e7eb] placeholder:text-slate-400 dark:placeholder:text-[#4b5563] text-sm leading-relaxed focus:outline-none disabled:opacity-40 min-h-7 max-h-40 py-1"
             />
 
             {/* Mic */}
             <button
                 type="button"
-                className="shrink-0 p-1.5 text-[#4b5563] hover:text-[#9ca3af] transition-colors rounded-lg"
+                className="shrink-0 p-1.5 text-slate-400 dark:text-[#4b5563] hover:text-slate-600 dark:hover:text-[#9ca3af] transition-colors rounded-lg"
                 aria-label="Voice input"
             >
                 <Mic size={18} strokeWidth={1.8} />
@@ -74,7 +72,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({ onSendMessage, disab
             <button
                 type="submit"
                 disabled={disabled || !input.trim()}
-                className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-[#6366f1] hover:bg-[#4f52d4] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-150"
+                className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-indigo-600 hover:bg-indigo-700 dark:bg-[#6366f1] dark:hover:bg-[#4f52d4] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-150 shadow-xs"
                 aria-label="Send message"
             >
                 <ArrowRight size={15} strokeWidth={2.5} className="text-white" />

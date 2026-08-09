@@ -8,14 +8,20 @@
 }
 
 html, body {
-  background: #0d0f11;
-  color: #e5e7eb;
   font-family: var(--font-sans);
   height: 100%;
   overflow: hidden;
+  background-color: #f8fafc;
+  color: #0f172a;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Custom scrollbar for dark theme */
+.dark html, .dark body, html.dark, body.dark {
+  background-color: #0d0f11;
+  color: #e5e7eb;
+}
+
+/* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -24,14 +30,20 @@ html, body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2e3238;
+  background: #cbd5e1;
   border-radius: 8px;
 }
+.dark ::-webkit-scrollbar-thumb {
+  background: #2e3238;
+}
 ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
   background: #4b5563;
 }
 
-/* Smooth animations */
+/* Smooth font rendering */
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

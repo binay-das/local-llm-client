@@ -5,9 +5,14 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 interface ThemeContextType {
     isDark: boolean;
     toggleTheme: () => void;
+    mounted: boolean;
 }
 
-const ThemeContext = createContext<ThemeContextType>({ isDark: false, toggleTheme: () => {} });
+const ThemeContext = createContext<ThemeContextType>({
+    isDark: false,
+    toggleTheme: () => {},
+    mounted: false,
+});
 
 export const useTheme = () => useContext(ThemeContext);
 
@@ -16,8 +21,8 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-    const [isDark, setIsDark] = useState(false);
-    const [mounted, setMounted] = useState(false);
+    const [isDark, setIsDark] = useState<boolean>(false);
+    const [mounted, setMounted] = useState<boolean>(false);
 
     useEffect(() => {
         const stored = localStorage.getItem('theme');
@@ -25,7 +30,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         const initialDark = stored === 'dark' || (!stored && prefersDark);
         setIsDark(initialDark);
         setMounted(true);
-        
+
         if (initialDark) {
             document.documentElement.classList.add('dark');
         } else {
@@ -47,13 +52,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         });
     };
 
-    if (!mounted) {
-        return <>{children}</>;
-    }
-
-
     return (
-        <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+        <ThemeContext.Provider value={{ isDark, toggleTheme, mounted }}>
             {children}
         </ThemeContext.Provider>
     );
